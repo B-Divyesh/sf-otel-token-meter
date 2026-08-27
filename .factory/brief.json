@@ -1,0 +1,11 @@
+{
+  "slug": "otel-token-meter",
+  "title": "OTel Token Meter",
+  "territory": "devtools-data",
+  "user": "Teams operating coding/agent tools who need local, vendor-neutral token and latency accounting from OpenTelemetry traces.",
+  "smallest_useful_product": "A local OTLP collector plus static dashboard/CLI that groups token, latency, cache, and error metrics by tool/model/project and exports CSV.",
+  "success_measure": "A pilot team can attribute 95%+ of observed token spend to a project/model without sending trace bodies to a third party.",
+  "artifact_class": "cli",
+  "monetization": "free",
+  "constraints": "Default to dropping prompt/completion bodies; document semantic-convention mappings; retain only aggregate metrics by default."
+}
