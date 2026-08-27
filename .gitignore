@@ -9,3 +9,4 @@ target/
 dist/
 token-meter.json
 *.tmp
+.factory/evidence/

@@ -51,10 +51,20 @@ function exportCsv() {
   byId('export-note').textContent = 'CSV exported locally.';
 }
 
-document.querySelectorAll<HTMLButtonElement>('[role="tab"]').forEach(tab => tab.addEventListener('click', () => {
-  document.querySelectorAll('[role="tab"]').forEach(item => item.setAttribute('aria-selected', 'false'));
-  tab.setAttribute('aria-selected', 'true'); currentGroup = tab.dataset.group as Group; empty = false; render();
-}));
+const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+function selectTab(tab: HTMLButtonElement) {
+  tabs.forEach(item => { item.setAttribute('aria-selected', 'false'); item.tabIndex = -1; });
+  tab.setAttribute('aria-selected', 'true'); tab.tabIndex = 0; byId('demo-table').setAttribute('aria-labelledby', tab.id);
+  currentGroup = tab.dataset.group as Group; empty = false; render();
+}
+tabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => selectTab(tab));
+  tab.addEventListener('keydown', event => {
+    const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+    if (!step) return;
+    event.preventDefault(); const next = tabs[(index + step + tabs.length) % tabs.length]; selectTab(next); next.focus();
+  });
+});
 byId<HTMLButtonElement>('export').addEventListener('click', exportCsv);
 byId<HTMLButtonElement>('empty-toggle').addEventListener('click', (event) => {
   empty = !empty; (event.currentTarget as HTMLButtonElement).textContent = empty ? 'Show sample data' : 'Show empty state'; render();
