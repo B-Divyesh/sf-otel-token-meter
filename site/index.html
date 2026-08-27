@@ -21,7 +21,7 @@
         <figure class="hero-art"><picture><source media="(max-width: 700px)" srcset="/trace-press-768.webp"><img src="/trace-press.webp" width="1200" height="800" fetchpriority="high" alt="A halftone field meter turns dotted telemetry streams into four aggregate ledger bands while message fragments dissolve before entering."></picture></figure>
       </div>
     </section>
-    <div class="strip" aria-label="Supported measures"><div class="strip-inner wrap"><span>Input + output</span><span>◆</span><span>Cache read + write</span><span>◆</span><span>Latency + errors</span><span>◆</span><span>Observed USD cost</span></div></div>
+    <div class="strip" aria-label="Supported measures"><div class="strip-inner wrap"><span>Input + output</span><span>◆</span><span>Cache read + write</span><span>◆</span><span>Latency + errors</span><span>◆</span><span>Observed or priced cost</span></div></div>
 
     <section id="demo" aria-labelledby="demo-title"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Recorded demo</div><h2 id="demo-title">The ledger, before the dashboard tax.</h2></div><p>Switch dimensions and export a real CSV. This sample mirrors the local dashboard served by the binary.</p></div>
       <div class="demo-shell"><div class="demo-top"><div class="collector-status"><i aria-hidden="true"></i> Sample collector live</div><div class="demo-label">No trace bodies retained</div></div><div class="demo-summary" aria-label="Sample totals"><div class="demo-stat"><strong>729</strong><span>requests</span></div><div class="demo-stat"><strong>1.61M</strong><span>tokens</span></div><div class="demo-stat"><strong>1,083 ms</strong><span>average latency</span></div><div class="demo-stat"><strong>8</strong><span>errors</span></div></div>
@@ -34,7 +34,7 @@
     </div></section>
 
     <section id="install" aria-labelledby="install-title"><div class="wrap install-grid"><div><div class="eyebrow">One binary</div><h2 id="install-title">Open the local meter.</h2><p>Start collecting in under a minute. The same address receives OTLP traces and serves the dashboard.</p><div class="principles"><div class="principle"><b>01</b><h3>Vendor-neutral</h3><p>Any OTLP/HTTP exporter can send traces.</p></div><div class="principle"><b>02</b><h3>Scriptable</h3><p>Table, JSON, and CSV outputs with useful exit codes.</p></div><div class="principle"><b>03</b><h3>Free + MIT</h3><p>No account, license key, or hosted dependency.</p></div></div></div>
-      <div class="terminal" aria-label="Installation commands"><div class="terminal-head">shell · localhost</div><pre><span class="prompt">$</span> cargo install otel-token-meter
+      <div class="terminal" aria-label="Installation commands"><div class="terminal-head">shell · localhost</div><pre><span class="prompt">$</span> cargo install --git https://github.com/B-Divyesh/sf-otel-token-meter
 
 <span class="prompt">$</span> otel-token-meter serve \
     --listen 127.0.0.1:4318 \

@@ -17,6 +17,7 @@ path = "src/main.rs"
 [dependencies]
 axum = "0.8.9"
 clap = { version = "4.5.47", features = ["derive"] }
+flate2 = "1.1.2"
 opentelemetry-proto = { version = "0.32.0", default-features = false, features = ["gen-tonic-messages", "trace", "with-serde"] }
 prost = "0.14.1"
 serde = { version = "1.0.219", features = ["derive"] }
@@ -30,4 +31,3 @@ tempfile = "3.21.0"
 strip = true
 lto = "thin"
 codegen-units = 1
-

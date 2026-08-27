@@ -2,6 +2,7 @@ use crate::{
     ingest,
     model::Store,
     output::{self, GroupBy},
+    pricing::PriceBook,
 };
 use axum::{
     body::Bytes,
@@ -11,29 +12,29 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use flate2::read::GzDecoder;
 use opentelemetry_proto::tonic::collector::trace::v1::ExportTraceServiceResponse;
 use prost::Message;
-use serde::Serialize;
-use std::{net::SocketAddr, path::PathBuf, sync::Arc};
+use std::{io::Read, net::SocketAddr, path::PathBuf, sync::Arc};
 use tokio::sync::RwLock;
 
 #[derive(Clone)]
 struct AppState {
     store: Arc<RwLock<Store>>,
     data_path: PathBuf,
+    prices: PriceBook,
 }
 
-#[derive(Serialize)]
-struct Ingested {
-    accepted_spans: u64,
-    message: &'static str,
-}
-
-pub async fn serve(addr: SocketAddr, data_path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn serve(
+    addr: SocketAddr,
+    data_path: PathBuf,
+    prices: PriceBook,
+) -> Result<(), Box<dyn std::error::Error>> {
     let store = Store::load(&data_path)?;
     let state = AppState {
         store: Arc::new(RwLock::new(store)),
         data_path,
+        prices,
     };
     let app = Router::new()
         .route("/", get(index))
@@ -88,12 +89,22 @@ async fn traces(State(state): State<AppState>, headers: HeaderMap, body: Bytes) 
         .get(header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("application/x-protobuf");
-    let request = match ingest::decode(&body, content_type) {
+    let encoding = headers
+        .get(header::CONTENT_ENCODING)
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("identity");
+    let decoded = match decode_content(&body, encoding) {
+        Ok(value) => value,
+        Err((status, message)) => {
+            return (status, Json(serde_json::json!({"error":message}))).into_response()
+        }
+    };
+    let request = match ingest::decode(&decoded, content_type) {
         Ok(value) => value,
         Err(message) => return (StatusCode::BAD_REQUEST, Json(serde_json::json!({"error":message,"next":"Send an OTLP ExportTraceServiceRequest as protobuf or JSON."}))).into_response(),
     };
     let mut store = state.store.write().await;
-    let accepted = ingest::aggregate(&request, &mut store);
+    ingest::aggregate(&request, &mut store, &state.prices);
     if let Err(error) = store.save(&state.data_path) {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -115,11 +126,58 @@ async fn traces(State(state): State<AppState>, headers: HeaderMap, body: Bytes) 
     } else {
         (
             StatusCode::OK,
-            Json(Ingested {
-                accepted_spans: accepted,
-                message: "Aggregates updated; trace bodies were discarded.",
-            }),
+            [(header::CONTENT_TYPE, "application/json")],
+            "{}",
         )
             .into_response()
+    }
+}
+
+fn decode_content(body: &[u8], encoding: &str) -> Result<Vec<u8>, (StatusCode, String)> {
+    match encoding.trim().to_ascii_lowercase().as_str() {
+        "" | "identity" => Ok(body.to_vec()),
+        "gzip" => {
+            let mut decoded = Vec::new();
+            GzDecoder::new(body)
+                .take(64 * 1024 * 1024 + 1)
+                .read_to_end(&mut decoded)
+                .map_err(|error| {
+                    (
+                        StatusCode::BAD_REQUEST,
+                        format!("invalid gzip body: {error}"),
+                    )
+                })?;
+            if decoded.len() > 64 * 1024 * 1024 {
+                Err((
+                    StatusCode::PAYLOAD_TOO_LARGE,
+                    "decompressed OTLP payload exceeds 64 MiB".into(),
+                ))
+            } else {
+                Ok(decoded)
+            }
+        }
+        other => Err((
+            StatusCode::UNSUPPORTED_MEDIA_TYPE,
+            format!("unsupported content encoding: {other}; use identity or gzip"),
+        )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use flate2::{write::GzEncoder, Compression};
+    use std::io::Write;
+
+    #[test]
+    fn accepts_gzip_and_rejects_unknown_encoding() {
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
+        encoder.write_all(b"{}").unwrap();
+        let compressed = encoder.finish().unwrap();
+        assert_eq!(decode_content(&compressed, "gzip").unwrap(), b"{}");
+        assert_eq!(
+            decode_content(b"{}", "br").unwrap_err().0,
+            StatusCode::UNSUPPORTED_MEDIA_TYPE
+        );
     }
 }

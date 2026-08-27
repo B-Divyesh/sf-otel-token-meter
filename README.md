@@ -16,10 +16,11 @@ otel-token-meter --help
 Start the OTLP collector and dashboard:
 
 ```sh
-otel-token-meter serve --listen 127.0.0.1:4318 --data ./token-meter.json
+otel-token-meter serve --listen 127.0.0.1:4318 --data ./token-meter.json \
+  --prices ./prices.json
 ```
 
-Point any OTLP/HTTP exporter to `http://127.0.0.1:4318`. Traces go to `/v1/traces`; the dashboard opens at `http://127.0.0.1:4318`. Both `application/x-protobuf` and OTLP JSON are accepted.
+Point any OTLP/HTTP exporter to `http://127.0.0.1:4318`. Traces go to `/v1/traces`; the dashboard opens at `http://127.0.0.1:4318`. Both `application/x-protobuf` and OTLP JSON are accepted, with identity or gzip content encoding.
 
 ```sh
 # Human-readable ledger
@@ -35,7 +36,26 @@ otel-token-meter export --data ./token-meter.json --group-by tool --output usage
 otel-token-meter ingest traces.json --data ./token-meter.json --json
 ```
 
-The commands are non-interactive. Success exits `0`, invalid input/config exits `2`, and runtime or I/O failure exits `1`.
+Try the repository fixture end to end with `otel-token-meter ingest examples/sample-traces.json --data /tmp/token-meter.json --prices examples/prices.json`, then run `report` against the same data file.
+
+The commands are non-interactive. Success exits `0`, command-line usage errors exit `2`, and invalid data, configuration, or I/O failures exit `1`.
+
+### Optional cost estimates
+
+If a span supplies `gen_ai.usage.cost` or `llm.usage.total_cost`, that observed USD value wins. Otherwise, pass a local price book to `serve` or `ingest`:
+
+```json
+{
+  "your-model-id": {
+    "input_per_million": 2.5,
+    "output_per_million": 10.0,
+    "cache_read_per_million": 0.25,
+    "cache_write_per_million": 3.0
+  }
+}
+```
+
+Keys match emitted model names exactly; `"*"` is an optional fallback. Cached input is subtracted from ordinary input before its cache rate is applied, avoiding double charges. Prices are read locally and are never fetched from a vendor.
 
 ### Supported semantic conventions
 

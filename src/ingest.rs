@@ -1,4 +1,7 @@
-use crate::model::{Dimensions, Metrics, Store};
+use crate::{
+    model::{Dimensions, Metrics, Store},
+    pricing::PriceBook,
+};
 use opentelemetry_proto::tonic::{
     collector::trace::v1::ExportTraceServiceRequest,
     common::v1::{any_value::Value, AnyValue, KeyValue},
@@ -17,7 +20,11 @@ pub fn decode(body: &[u8], content_type: &str) -> Result<ExportTraceServiceReque
     }
 }
 
-pub fn aggregate(request: &ExportTraceServiceRequest, store: &mut Store) -> u64 {
+pub fn aggregate(
+    request: &ExportTraceServiceRequest,
+    store: &mut Store,
+    prices: &PriceBook,
+) -> u64 {
     let mut accepted = 0;
     for resource_spans in &request.resource_spans {
         let resource = attrs(
@@ -29,7 +36,7 @@ pub fn aggregate(request: &ExportTraceServiceRequest, store: &mut Store) -> u64 
         );
         for scope_spans in &resource_spans.scope_spans {
             for span in &scope_spans.spans {
-                if let Some((dims, metrics)) = span_metrics(span, &resource) {
+                if let Some((dims, metrics)) = span_metrics(span, &resource, prices) {
                     store.record(&dims, &metrics);
                     accepted += 1;
                 }
@@ -39,7 +46,11 @@ pub fn aggregate(request: &ExportTraceServiceRequest, store: &mut Store) -> u64 
     accepted
 }
 
-fn span_metrics(span: &Span, resource: &HashMap<&str, &AnyValue>) -> Option<(Dimensions, Metrics)> {
+fn span_metrics(
+    span: &Span,
+    resource: &HashMap<&str, &AnyValue>,
+    prices: &PriceBook,
+) -> Option<(Dimensions, Metrics)> {
     let values = attrs(&span.attributes);
     let input_tokens = first_u64(
         &values,
@@ -107,10 +118,21 @@ fn span_metrics(span: &Span, resource: &HashMap<&str, &AnyValue>) -> Option<(Dim
     let error =
         span.status.as_ref().is_some_and(|s| s.code == 2) || values.contains_key("error.type");
 
+    let model = model.unwrap_or_else(|| "unknown".to_string());
+    let cost_usd = first_optional_f64(&values, &["gen_ai.usage.cost", "llm.usage.total_cost"])
+        .unwrap_or_else(|| {
+            prices.estimate(
+                &model,
+                input_tokens,
+                output_tokens,
+                cache_read_tokens,
+                cache_write_tokens,
+            )
+        });
     Some((
         Dimensions {
             project,
-            model: model.unwrap_or_else(|| "unknown".to_string()),
+            model,
             tool,
         },
         Metrics {
@@ -121,7 +143,7 @@ fn span_metrics(span: &Span, resource: &HashMap<&str, &AnyValue>) -> Option<(Dim
             cache_write_tokens,
             duration_ms: duration_ns as f64 / 1_000_000.0,
             errors: u64::from(error),
-            cost_usd: first_f64(&values, &["gen_ai.usage.cost", "llm.usage.total_cost"]),
+            cost_usd,
         },
     ))
 }
@@ -139,10 +161,8 @@ fn first_u64(values: &HashMap<&str, &AnyValue>, keys: &[&str]) -> u64 {
         .unwrap_or(0)
 }
 
-fn first_f64(values: &HashMap<&str, &AnyValue>, keys: &[&str]) -> f64 {
-    keys.iter()
-        .find_map(|key| values.get(key).and_then(as_f64))
-        .unwrap_or(0.0)
+fn first_optional_f64(values: &HashMap<&str, &AnyValue>, keys: &[&str]) -> Option<f64> {
+    keys.iter().find_map(|key| values.get(key).and_then(as_f64))
 }
 
 fn first_string(values: &HashMap<&str, &AnyValue>, keys: &[&str]) -> Option<String> {
@@ -184,7 +204,7 @@ mod tests {
         let body = br#"{"resourceSpans":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"kiro"}},{"key":"service.namespace","value":{"stringValue":"checkout"}}]},"scopeSpans":[{"spans":[{"name":"chat","startTimeUnixNano":"1000000","endTimeUnixNano":"61000000","attributes":[{"key":"gen_ai.request.model","value":{"stringValue":"model-a"}},{"key":"gen_ai.usage.input_tokens","value":{"intValue":"100"}},{"key":"gen_ai.usage.output_tokens","value":{"intValue":"25"}},{"key":"gen_ai.prompt","value":{"stringValue":"SECRET"}}],"status":{"code":1}}]}]}]}"#;
         let request = decode(body, "application/json").unwrap();
         let mut store = Store::default();
-        assert_eq!(aggregate(&request, &mut store), 1);
+        assert_eq!(aggregate(&request, &mut store, &PriceBook::default()), 1);
         let totals = store.totals();
         assert_eq!(totals.total_tokens(), 125);
         assert_eq!(totals.duration_ms, 60.0);
@@ -197,6 +217,9 @@ mod tests {
             r#"{"resourceSpans":[{"scopeSpans":[{"spans":[{"name":"http"}]}]}]}"#,
         )
         .unwrap();
-        assert_eq!(aggregate(&request, &mut Store::default()), 0);
+        assert_eq!(
+            aggregate(&request, &mut Store::default(), &PriceBook::default()),
+            0
+        );
     }
 }

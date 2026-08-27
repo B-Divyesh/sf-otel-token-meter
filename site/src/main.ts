@@ -60,7 +60,11 @@ byId<HTMLButtonElement>('empty-toggle').addEventListener('click', (event) => {
   empty = !empty; (event.currentTarget as HTMLButtonElement).textContent = empty ? 'Show sample data' : 'Show empty state'; render();
 });
 byId<HTMLButtonElement>('copy-command').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText('cargo install otel-token-meter'); byId('copy-result').textContent = 'Copied.'; }
+  try { await navigator.clipboard.writeText('cargo install --git https://github.com/B-Divyesh/sf-otel-token-meter'); byId('copy-result').textContent = 'Copied.'; }
   catch { byId('copy-result').textContent = 'Select and copy the command above.'; }
 });
 render();
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('/sw.js').catch(() => { /* The site remains fully usable online. */ });
+}

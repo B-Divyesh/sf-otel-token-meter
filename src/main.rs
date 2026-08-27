@@ -1,6 +1,7 @@
 mod ingest;
 mod model;
 mod output;
+mod pricing;
 mod web;
 
 use clap::{Parser, Subcommand};
@@ -26,6 +27,9 @@ enum Command {
         /// Aggregate-only JSON data file.
         #[arg(long, default_value = "token-meter.json")]
         data: PathBuf,
+        /// Optional per-model USD price book (per million tokens).
+        #[arg(long)]
+        prices: Option<PathBuf>,
     },
     /// Print aggregated usage as a table or stable JSON.
     Report {
@@ -53,6 +57,9 @@ enum Command {
         input: PathBuf,
         #[arg(long, default_value = "token-meter.json")]
         data: PathBuf,
+        /// Optional per-model USD price book (per million tokens).
+        #[arg(long)]
+        prices: Option<PathBuf>,
         /// Emit a JSON receipt.
         #[arg(long)]
         json: bool,
@@ -72,7 +79,11 @@ async fn main() -> ExitCode {
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     match Cli::parse().command {
-        Command::Serve { listen, data } => web::serve(listen, data).await?,
+        Command::Serve {
+            listen,
+            data,
+            prices,
+        } => web::serve(listen, data, pricing::PriceBook::load(prices.as_deref())?).await?,
         Command::Report {
             data,
             group_by,
@@ -97,7 +108,12 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
                 fs::write(destination, csv)?;
             }
         }
-        Command::Ingest { input, data, json } => {
+        Command::Ingest {
+            input,
+            data,
+            prices,
+            json,
+        } => {
             let bytes = fs::read(&input)?;
             let is_json = input.extension().is_some_and(|ext| ext == "json")
                 || bytes.iter().find(|b| !b.is_ascii_whitespace()) == Some(&b'{');
@@ -111,7 +127,8 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
             )
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
             let mut store = Store::load(&data)?;
-            let accepted = ingest::aggregate(&request, &mut store);
+            let price_book = pricing::PriceBook::load(prices.as_deref())?;
+            let accepted = ingest::aggregate(&request, &mut store, &price_book);
             store.save(&data)?;
             if json {
                 println!(
