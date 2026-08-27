@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Local, vendor-neutral token, cost, cache, latency, and error accounting from OpenTelemetry traces.">
+  <meta name="theme-color" content="#f3ebd8">
+  <title>OTel Token Meter · Private token accounting from your traces</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <nav class="nav wrap" aria-label="Primary navigation"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a><div class="nav-links"><a href="#how">How it maps</a><a href="#demo">Demo</a><a class="button" href="#install">Install free</a></div></nav>
+  </header>
+  <main id="main">
+    <section class="hero">
+      <div class="hero-grid wrap">
+        <div class="hero-copy"><div class="eyebrow">Local OTLP accounting</div><h1>Count every token. Keep every prompt private.</h1><p class="lede">Turn traces from coding agents and LLM apps into a local ledger of tokens, cost, cache, latency, and errors—without another SDK, proxy, or hosted dashboard.</p><div class="actions"><a class="button" href="#install">Install the collector <span aria-hidden="true">↓</span></a><a class="button secondary" href="https://github.com/B-Divyesh/sf-otel-token-meter">Read the source</a></div><p class="privacy-line"><span aria-hidden="true"></span>Aggregate-only storage. Loopback by default. Zero telemetry.</p></div>
+        <figure class="hero-art"><picture><source media="(max-width: 700px)" srcset="/trace-press-768.webp"><img src="/trace-press.webp" width="1200" height="800" fetchpriority="high" alt="A halftone field meter turns dotted telemetry streams into four aggregate ledger bands while message fragments dissolve before entering."></picture></figure>
+      </div>
+    </section>
+    <div class="strip" aria-label="Supported measures"><div class="strip-inner wrap"><span>Input + output</span><span>◆</span><span>Cache read + write</span><span>◆</span><span>Latency + errors</span><span>◆</span><span>Observed USD cost</span></div></div>
+
+    <section id="demo" aria-labelledby="demo-title"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Recorded demo</div><h2 id="demo-title">The ledger, before the dashboard tax.</h2></div><p>Switch dimensions and export a real CSV. This sample mirrors the local dashboard served by the binary.</p></div>
+      <div class="demo-shell"><div class="demo-top"><div class="collector-status"><i aria-hidden="true"></i> Sample collector live</div><div class="demo-label">No trace bodies retained</div></div><div class="demo-summary" aria-label="Sample totals"><div class="demo-stat"><strong>729</strong><span>requests</span></div><div class="demo-stat"><strong>1.61M</strong><span>tokens</span></div><div class="demo-stat"><strong>1,083 ms</strong><span>average latency</span></div><div class="demo-stat"><strong>8</strong><span>errors</span></div></div>
+        <div class="demo-tools"><div class="tabs" role="tablist" aria-label="Group sample ledger"><button class="tab" role="tab" aria-selected="true" data-group="project">Project</button><button class="tab" role="tab" aria-selected="false" data-group="model">Model</button><button class="tab" role="tab" aria-selected="false" data-group="tool">Tool</button></div><div><button class="button secondary" id="empty-toggle" type="button">Show empty state</button> <button class="button" id="export" type="button">Export CSV</button></div></div><div class="export-note" id="export-note" role="status"></div><div class="table-wrap" id="demo-table" tabindex="0" aria-label="Sample usage ledger; scroll horizontally for all columns" aria-live="polite"></div>
+      </div></div></section>
+
+    <section id="how" aria-labelledby="how-title"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Known conventions, honest gaps</div><h2 id="how-title">One trace in. Three useful dimensions out.</h2></div><p>Standard GenAI attributes are preferred; common legacy names are mapped. Anything missing remains visible as <code>unknown</code>.</p></div>
+      <div class="map-grid"><div class="map-intro"><h3>Trace content is not accounting data.</h3><p>Prompt text, completion text, trace IDs, events, and individual spans are never written to disk. Only the counters needed for attribution cross into the ledger.</p><p><strong>Stored:</strong> grouped counters, duration totals, error counts, observed cost, last-updated time.</p></div><div class="map-flow"><div class="flow-step"><strong>OTLP/HTTP</strong><small>protobuf or JSON · /v1/traces</small></div><div class="flow-step"><strong>Semantic mapping</strong><small>GenAI + common legacy attributes</small></div><div class="flow-step"><strong>Aggregate ledger</strong><small>project × model × tool</small></div></div></div>
+      <div class="conventions table-wrap" tabindex="0" aria-label="Semantic convention mapping; scroll horizontally for all columns"><table><thead><tr><th scope="col">Measure</th><th scope="col">Preferred attribute</th><th scope="col">Fallback</th></tr></thead><tbody><tr><td data-label="Measure">Input tokens</td><td data-label="Preferred"><code>gen_ai.usage.input_tokens</code></td><td data-label="Fallback"><code>llm.usage.prompt_tokens</code></td></tr><tr><td data-label="Measure">Output tokens</td><td data-label="Preferred"><code>gen_ai.usage.output_tokens</code></td><td data-label="Fallback"><code>llm.usage.completion_tokens</code></td></tr><tr><td data-label="Measure">Model</td><td data-label="Preferred"><code>gen_ai.response.model</code></td><td data-label="Fallback"><code>gen_ai.request.model</code></td></tr><tr><td data-label="Measure">Project</td><td data-label="Preferred"><code>service.namespace</code></td><td data-label="Fallback"><code>project.id</code></td></tr></tbody></table></div>
+    </div></section>
+
+    <section id="install" aria-labelledby="install-title"><div class="wrap install-grid"><div><div class="eyebrow">One binary</div><h2 id="install-title">Open the local meter.</h2><p>Start collecting in under a minute. The same address receives OTLP traces and serves the dashboard.</p><div class="principles"><div class="principle"><b>01</b><h3>Vendor-neutral</h3><p>Any OTLP/HTTP exporter can send traces.</p></div><div class="principle"><b>02</b><h3>Scriptable</h3><p>Table, JSON, and CSV outputs with useful exit codes.</p></div><div class="principle"><b>03</b><h3>Free + MIT</h3><p>No account, license key, or hosted dependency.</p></div></div></div>
+      <div class="terminal" aria-label="Installation commands"><div class="terminal-head">shell · localhost</div><pre><span class="prompt">$</span> cargo install otel-token-meter
+
+<span class="prompt">$</span> otel-token-meter serve \
+    --listen 127.0.0.1:4318 \
+    --data ./token-meter.json
+
+collecting → http://127.0.0.1:4318/v1/traces
+dashboard  → http://127.0.0.1:4318/</pre><div class="copy-row"><span id="copy-result" role="status"></span><button class="button" id="copy-command" type="button">Copy install command</button></div></div>
+    </div></section>
+  </main>
+  <footer class="site-footer"><div class="wrap footer-grid"><div><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a><p>Private accounting for public conventions.</p></div><div class="footer-links"><a href="https://github.com/B-Divyesh/sf-otel-token-meter">GitHub</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></div></div></footer>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

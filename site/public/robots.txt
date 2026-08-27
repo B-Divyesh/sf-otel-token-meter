@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://otel-token-meter.sociobot.in/sitemap.xml

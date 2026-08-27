@@ -15,7 +15,7 @@ The primary treatment is intentionally light, like warm uncoated stock. A dark t
 | Carbon | `#18201B` | `#F5EEDC` | body and primary rules |
 | Carbon muted | `#536057` | `#B4C0B5` | secondary text (≥4.5:1) |
 | Meter green | `#176B45` | `#77D89E` | action, healthy collection |
-| Signal orange | `#C44A23` | `#FF9A6C` | errors and emphasis |
+| Signal orange | `#A83A1D` | `#FF9A6C` | errors and emphasis |
 | Brass | `#A76B00` | `#E9BC62` | cache/warning |
 | Rule | `#9C9A89` | `#687067` | structure and focus boundaries |
 

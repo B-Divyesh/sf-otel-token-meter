@@ -1,0 +1,17 @@
+{
+  "name": "otel-token-meter-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config site/vite.config.ts",
+    "build:site": "vite build --config site/vite.config.ts",
+    "build:cli": "cargo build --release && node scripts/copy-binary.mjs",
+    "build": "npm run build:cli && npm run build:site",
+    "test": "cargo test && npm run build:site && node scripts/site-test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3"
+  }
+}

@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light dark">
   <title>Local dashboard · OTel Token Meter</title>
   <style>
-    :root{--paper:#f3ebd8;--sheet:#fff9eb;--ink:#18201b;--muted:#536057;--green:#176b45;--orange:#c44a23;--brass:#815500;--rule:#777a6e;font:16px/1.55 ui-monospace,SFMono-Regular,Cascadia Code,Liberation Mono,monospace;color:var(--ink);background:var(--paper)}
+    :root{--paper:#f3ebd8;--sheet:#fff9eb;--ink:#18201b;--muted:#536057;--green:#176b45;--orange:#a83a1d;--brass:#815500;--rule:#777a6e;font:16px/1.55 ui-monospace,SFMono-Regular,Cascadia Code,Liberation Mono,monospace;color:var(--ink);background:var(--paper)}
     *{box-sizing:border-box}body{margin:0}a{color:inherit}button,select{font:inherit;color:inherit}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--orange);outline-offset:3px}.skip{position:absolute;left:8px;top:-80px;background:var(--ink);color:var(--sheet);padding:12px;z-index:2}.skip:focus{top:8px}
     header,main,footer{width:min(1120px,calc(100% - 32px));margin:auto}header{padding:28px 0 20px;border-bottom:3px solid var(--ink);display:flex;align-items:end;justify-content:space-between;gap:16px}.brand{font:700 22px Rockwell,Roboto Slab,DejaVu Serif,serif}.status{display:flex;align-items:center;gap:8px;color:var(--green);font-weight:700}.dot{width:12px;height:12px;border:2px solid currentColor;background:currentColor;border-radius:50%;animation:pulse 2.4s ease-in-out infinite}@keyframes pulse{50%{opacity:.35}}
     main{padding:48px 0 72px}h1{font:700 clamp(34px,7vw,64px)/.95 Rockwell,Roboto Slab,DejaVu Serif,serif;letter-spacing:-.04em;margin:0 0 12px;max-width:760px}.lead{color:var(--muted);max-width:68ch;margin:0 0 40px}.totals{border-block:3px solid var(--ink);display:grid;grid-template-columns:repeat(4,1fr);margin-bottom:40px}.metric{padding:20px 16px;border-right:1px solid var(--rule)}.metric:last-child{border:0}.metric strong{display:block;font:700 clamp(24px,4vw,38px)/1 Rockwell,Roboto Slab,DejaVu Serif,serif;font-variant-numeric:tabular-nums}.metric span{display:block;color:var(--muted);margin-top:8px;font-size:14px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px}h2{font:700 25px Rockwell,Roboto Slab,DejaVu Serif,serif;margin:0}.toolbar label{display:flex;gap:10px;align-items:center}.toolbar select{min-height:44px;background:var(--sheet);border:2px solid var(--ink);padding:8px 40px 8px 12px}
@@ -26,7 +26,7 @@
     <div class="metric"><strong id="requests">—</strong><span>requests</span></div><div class="metric"><strong id="tokens">—</strong><span>tokens</span></div><div class="metric"><strong id="latency">—</strong><span>average latency</span></div><div class="metric"><strong id="errors">—</strong><span>errors</span></div>
   </section>
   <div class="toolbar"><h2>Aggregate ledger</h2><label for="group">Group by <select id="group"><option value="project">Project</option><option value="model">Model</option><option value="tool">Tool</option></select></label></div>
-  <div class="ledger" id="ledger" aria-live="polite"><div class="empty">Reading the local ledger…</div></div>
+  <div class="ledger" id="ledger" tabindex="0" aria-label="Aggregate usage ledger; scroll horizontally for all columns" aria-live="polite"><div class="empty">Reading the local ledger…</div></div>
 </main>
 <footer>Local-only dashboard · data refreshes while this tab is visible · v0.1.0</footer>
 <script>
