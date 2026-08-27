@@ -63,7 +63,12 @@ async fn index() -> Html<&'static str> {
 async fn health() -> impl IntoResponse {
     (
         [(header::CACHE_CONTROL, "no-store")],
-        Json(serde_json::json!({"status":"ok","privacy":"aggregate-only"})),
+        Json(serde_json::json!({
+            "status":"ok",
+            "privacy":"aggregate-only",
+            "version":env!("CARGO_PKG_VERSION"),
+            "build":env!("OTEL_TOKEN_METER_BUILD"),
+        })),
     )
 }
 

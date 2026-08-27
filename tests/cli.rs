@@ -116,6 +116,14 @@ fn http_collector_serves_dashboard_and_reports_errors() {
     assert!(home.starts_with("HTTP/1.1 200"));
     assert!(home.contains("Your traces, reduced to evidence."));
 
+    let health = request(
+        addr,
+        "GET /health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
+    );
+    assert!(health.starts_with("HTTP/1.1 200"));
+    assert!(health.contains("\"version\":\"0.1.0\""));
+    assert!(health.contains("\"build\":\""));
+
     let body = fixture();
     let response = request(addr, &format!("POST /v1/traces HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}", body.len(), body));
     assert!(response.starts_with("HTTP/1.1 200"), "{response}");

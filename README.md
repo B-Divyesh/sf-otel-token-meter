@@ -22,6 +22,8 @@ otel-token-meter serve --listen 127.0.0.1:4318 --data ./token-meter.json \
 
 Point any OTLP/HTTP exporter to `http://127.0.0.1:4318`. Traces go to `/v1/traces`; the dashboard opens at `http://127.0.0.1:4318`. Both `application/x-protobuf` and OTLP JSON are accepted, with identity or gzip content encoding.
 
+`GET /health` returns the aggregate-only privacy mode plus the binary version and build ID, so local operators can identify the collector they are checking.
+
 ```sh
 # Human-readable ledger
 otel-token-meter report --data ./token-meter.json --group-by project
@@ -80,10 +82,12 @@ npm install
 npm test
 npm run build        # release binary + site at dist/site/
 npm run dev          # static site on localhost
+npx playwright install chromium
+npm run test:browser # desktop keyboard/a11y + exact 390 px layout checks
 cargo package --allow-dirty
 ```
 
-Rust tests cover protobuf/JSON ingestion, privacy exclusions, grouping, reports, and the documented workflow. Site tests check structural accessibility and asset budgets.
+Rust tests cover protobuf/JSON ingestion, privacy exclusions, grouping, reports, and the documented workflow. Site tests check structural accessibility and asset budgets. The browser suite verifies the recorded landing ledger and populated local dashboard have no horizontal document overflow at a 390 px viewport, preserves keyboard tab switching, and reports no axe violations.
 
 ## Data and privacy
 
