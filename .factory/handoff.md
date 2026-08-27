@@ -42,6 +42,10 @@ Evidence from this repair:
 - Deploy root: `dist/site/`.
 - Work-order build command: `npm ci && npm run build:site`.
 - Publish command used by the factory worker: `/opt/fleet/lib/deploy-static.sh otel-token-meter dist/site`.
+- Deployed from product commit `38af6e88f0052c437d1a696f2a2d58548b398a55`. The live `index.html` SHA-256 was `3abfa556b9115ea1e4c04561ef64f15845ce999ea34cee312b2606029029d226`, exactly matching `dist/site/index.html`; the deployed JavaScript SHA-256 also exactly matched the built asset.
+- Live verification at `https://otel-token-meter.sociobot.in/` returned HTTP 200 in 668 ms with no console/page errors, title/lang/one h1/main, and no missing image alt text or unlabeled buttons. At 390 px its document width was **390/390**. No request left the site origin.
+- The live service worker was controlling the page, registered `otel-token-meter-site-v1`, and an offline reload retained the landing h1. Its shipped update path includes `skipWaiting` and `clients.claim`.
+- Live response policy is present: HTTPS/HSTS, self-only CSP, `nosniff`, strict-origin referrer policy, restrictive permissions policy; the hashed JS is immutable for one year and HTML/service worker revalidate after 30 seconds.
 
 ## Known gaps / next steps
 
