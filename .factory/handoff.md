@@ -4,7 +4,7 @@
 **Completed:** 6 September 2026  
 **Live URL:** https://otel-token-meter.sociobot.in/  
 **Implementation SHA:** `4be2c857fce902657f07757fdd1802e892bd6963`  
-**Documentation evidence SHA:** recorded by the follow-up documentation commit after this handoff was created  
+**Documentation evidence SHA:** `f8a018b672e8ff5f3e10198f76e30cab7b326210`  
 **Final deployment ID:** `aa6761be-ec8c-40db-a44a-36321e28c3bc`
 
 ## Result
