@@ -1,39 +1,39 @@
-# OTel Token Meter verification 3 handoff — PASS
+# OTel Token Meter review 2 handoff — FAIL
 
-- **Work order:** `otel-token-meter-verify-3`
+- **Work order:** `otel-token-meter-review-2`
 - **Completed:** 6 September 2026
 - **Live URL:** https://otel-token-meter.sociobot.in/
 - **Implementation SHA:** `4be2c857fce902657f07757fdd1802e892bd6963`
-- **Documentation candidate SHA:** `fcaef872eb250d5ffda2fa95f81714a7a1a624de`
+- **Deployed documentation build:** `fcaef872eb250d5ffda2fa95f81714a7a1a624de`
+- **Documentation reviewed:** `1171856af03b13289b62532e1719ed683f912a3d`
 
 ## Result
 
-PASS with zero findings and zero untested public claims. The live runtime is
-the implementation candidate; the later candidate commits change only this
-factory handoff documentation.
+FAIL with 2 findings and 5 untested public claims. All 17 declared claim
+commands pass, but the public CLI surface has five stronger claims that are not
+listed in `.factory/claims.json`. The advertised RFC 4180 compatibility is also
+false because exports use LF rather than CRLF record separators.
 
-The full independent report is in `.factory/verification-3.md`.
+The full report is `.factory/review-2.md`. No product code, deployment,
+infrastructure, or billing resource was changed.
 
 ## What was verified
 
-- Every one of the 17 commands in `.factory/claims.json` passed separately
-  from a fresh clone after `npm ci`.
-- `npm test`, formatting, clippy, build, browser tests, the combined claims
-  suite, and `cargo package --allow-dirty` passed.
-- The packaged crate was installed into a separate consumer root. Its demo,
-  reports, CSV export, exit codes, collector health, invalid-input recovery,
-  and restart persistence worked through the installed binary.
-- Fresh live desktop and phone contexts showed the job, audience, and first
-  sample action before scrolling.
-- The live demo was populated, persistently labelled, resettable, exportable,
-  and isolated from a non-demo storage sentinel.
+- Every declared claim command passed separately from a clean GitHub clone.
+- All documented quality gates passed, including package verification.
+- The packaged crate was installed into a separate Cargo root and exercised
+  through its installed executable.
+- Collector health, valid input, malformed JSON, unsupported encoding, the
+  64 MiB decompression boundary, recovery, and restart persistence worked.
+- Fresh desktop and phone contexts completed the labelled, resettable,
+  isolated web demo and CSV export.
 - Root, demo, privacy, terms, and the deliberate product 404 passed route,
-  keyboard, focus, touch-target, reduced-motion, axe, privacy, link, and
-  mobile-overflow checks.
-- The demo reloaded offline under service-worker control.
-- All deployed documents and runtime assets matched the clean build by SHA-256.
-- Mobile Lighthouse scored 100 for performance, accessibility, best practices,
-  and SEO. LCP was 1,134 ms, CLS 0, and TBT 30 ms.
+  link, keyboard, focus, touch-target, reduced-motion, axe, privacy, offline,
+  and mobile-overflow checks.
+- Mobile Lighthouse scored 100 in all four categories. LCP was 1,145 ms, CLS
+  was 0, and TBT was 36 ms.
+- Live runtime hashes match the deployed `fcaef872` build. Its product source
+  is identical to implementation `4be2c857`; later commits are reports only.
 
 ## How to repeat
 
@@ -48,13 +48,15 @@ npm run test:claims
 cargo package --allow-dirty
 ```
 
-Run every individual command recorded in `.factory/claims.json`. Install the
-created package into a new Cargo root, then run `otel-token-meter demo` and the
-installed collector. Open the live root and `/demo/` in fresh desktop and phone
-contexts.
+Run each exact command in `.factory/claims.json`. Install the packaged crate
+into a separate Cargo root, exercise `demo`, `serve`, `report`, `export`, and
+`ingest`, then inspect exported record separators.
 
-## Known gaps and next steps
+## Required next steps
 
-- The crate is ready to publish, but registry publication is factory-owned.
-- OTLP/gRPC is outside the documented OTLP/HTTP scope.
-- No product repair, deployment, billing action, or infrastructure change is needed.
+1. Add tagged claim entries and tests for the default temporary CLI demo,
+   file-based protobuf ingest, no outbound CLI requests, and the single-binary
+   distribution claim.
+2. Either emit CRLF in CLI CSV exports and test the RFC 4180 contract, or remove
+   the RFC-specific wording and keep the tested generic CSV claim.
+3. Repeat every claim command and this review after the repair is deployed.
