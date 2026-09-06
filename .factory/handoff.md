@@ -2,6 +2,7 @@
 
 - **Live URL:** https://otel-token-meter.sociobot.in/
 - **Implementation and deployed build:** `2c813bae379dbfa746c24dcef3fa26d54b4746db`
+- **Documentation/verification commit:** `9053165f23db1783651dca26e66504ea626af621`
 - **Result:** PASS — review 3's formatting failure is fixed; no known product defect or untested public claim remains.
 
 ## What changed
