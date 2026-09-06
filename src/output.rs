@@ -167,13 +167,9 @@ mod tests {
         let value = csv(&report(&store, GroupBy::Project));
         assert!(value.contains("\"a, \"\"team\"\"\",1,4,2,6"));
         assert!(value.ends_with("\r\n"));
-        assert!(value
-            .as_bytes()
-            .windows(2)
-            .any(|bytes| bytes == b"\r\n"));
-        assert!(value
-            .bytes()
-            .enumerate()
-            .all(|(index, byte)| byte != b'\n' || index > 0 && value.as_bytes()[index - 1] == b'\r'));
+        assert!(value.as_bytes().windows(2).any(|bytes| bytes == b"\r\n"));
+        assert!(value.bytes().enumerate().all(
+            |(index, byte)| byte != b'\n' || index > 0 && value.as_bytes()[index - 1] == b'\r'
+        ));
     }
 }
