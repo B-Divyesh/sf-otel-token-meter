@@ -70,6 +70,10 @@ test('every public route has its own title, common navigation, and accessible co
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('main')).toHaveCount(1);
     await expect(page.getByRole('navigation').getByRole('link', { name: 'Demo' })).toBeVisible();
+    expect(await page.locator('a, button, select').evaluateAll(elements => elements.filter(element => {
+      const box = element.getBoundingClientRect();
+      return box.width > 0 && box.height > 0 && (box.width < 44 || box.height < 44);
+    }).map(element => ({ text: element.textContent?.trim(), box: element.getBoundingClientRect().toJSON() })))).toEqual([]);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   }
 
