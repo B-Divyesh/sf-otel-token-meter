@@ -1,71 +1,159 @@
 # Count tokens from OTLP traces — verification 4
 
 - **Verdict:** PASS
+- **Findings:** 0
+- **Untested public claims:** 0
 - **Verified:** 6 September 2026
 - **Live URL:** https://otel-token-meter.sociobot.in/
-- **Implementation/deployment SHA:** `3bde59e0ae9225a7f7c2fc8602cbd170587494cc`
-- **Documentation verification commit:** `942117a898acaf2b515b479a863afc34860f1362` (documentation only)
+- **Implementation candidate:** `3bde59e0ae9225a7f7c2fc8602cbd170587494cc`
+- **Documentation commit:** `d5ec335fb31415c6e55f82a1a3d7d3eaaf622f85`
+- **Earlier repair-verification documentation:** `942117a898acaf2b515b479a863afc34860f1362`
 
 ## Decision
 
-PASS. This repair resolves the strict review's two findings: the CLI now emits
-RFC 4180 CRLF CSV records, and every public CLI outcome has a matching tagged
-claim test. The public surface contains 21 declared claims, all of which passed
-both together and one at a time from a fresh clone.
+**PASS.** The local CLI performs the intended job: it accepts OTLP/HTTP data,
+keeps aggregate-only totals, groups usage, and exports it. The live site gives
+visitors an isolated one-click sample. There are zero findings at every
+severity and zero untested public claims.
 
-## Claims and consumer evidence
+The implementation reviewed is `3bde59e`. `942117a` and `d5ec335` change only
+verification/handoff documents. The deployed JavaScript hash exactly matches a
+clean build of `3bde59e`. The live HTML footer is stamped `d5ec335fb314`, which
+is the later documentation-only build identifier and does not indicate a
+product-code difference.
 
-The clean clone ran every documented quality command, then each exact command in
-`.factory/claims.json`. All passed. The manifest now covers the original
-accounting, transport, storage, privacy, health, loopback, report, price,
-semantic mapping, web demo, offline, and MIT outcomes plus these repaired items:
+## First screen before scrolling
 
-| Claim | Outcome observed |
+Fresh 1440 × 900 desktop and 390 × 844 phone browser contexts opened the live
+root at scroll position zero.
+
+- **Job:** Count tokens from OpenTelemetry traces.
+- **Audience:** Teams running coding agents that need local token, cost, cache,
+  latency, and error totals.
+- **First action:** **Try it with sample data**. It is visible and opens
+  `/demo/` in one click.
+
+The first screen also states that the product is free and MIT licensed, stores
+aggregate totals only, and runs on the user's machine.
+
+## Clean checkout, claims, and installed artifact
+
+A separate clean checkout at `3bde59e` ran `npm ci`, the pinned Playwright
+Chromium installation, and every documented quality command successfully:
+
+```sh
+npm test
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings
+npm run build
+npm run test:browser
+npm run test:claims
+cargo package --allow-dirty
+```
+
+Results: 8 Rust unit tests, 3 CLI/HTTP integration tests, 4 browser tests, and
+21 combined claim tests passed. `npm run build` produced `dist/bin/` and
+`dist/site/`. `cargo package` verified 34 files (167.8 KiB uncompressed,
+47.2 KiB compressed). The static build measured 5,805 B JavaScript, 11,944 B
+CSS, and a 110,032 B main image.
+
+Each exact command in `.factory/claims.json` was then run separately from that
+same clean setup. All 21 passed:
+
+| Claim | Result |
 | --- | --- |
-| `csv-export` | Project export has five CRLF-delimited records, the expected header, and four group rows. |
-| `cli-demo-isolation` | Two default demos made different temporary directories, wrote sample/ledger/CSV files there, printed them, and left a working-directory sentinel untouched. |
-| `file-protobuf-ingest` | A real one-span `.pb` OTLP request produced the `protobuf-project` row with 123 input, 45 output, and 100 ms. |
-| `no-outbound-cli-requests` | The preload observer loaded, rejected all socket sends, and recorded no connection attempt during the real demo. |
-| `single-binary-distribution` | A packaged crate installed exactly one `otel-token-meter` executable in a new Cargo root; `--version` returned `0.1.0`. |
+| accounting-groups | Pass |
+| otlp-http-formats | Pass |
+| aggregate-only-storage | Pass |
+| no-account-or-telemetry | Pass |
+| no-outbound-cli-requests | Pass |
+| health-identity | Pass |
+| default-loopback | Pass |
+| report-outputs | Pass |
+| csv-export | Pass |
+| cli-demo-isolation | Pass |
+| file-protobuf-ingest | Pass |
+| single-binary-distribution | Pass |
+| exit-codes | Pass |
+| local-price-book | Pass |
+| semantic-mapping | Pass |
+| web-demo-matches-cli | Pass |
+| web-csv-export | Pass |
+| offline-reload | Pass |
+| demo-sandbox | Pass |
+| site-privacy | Pass |
+| free-mit | Pass |
 
-The independent installed-artifact exercise also confirmed normal, invalid,
-unsupported-encoding, recovery, and restart persistence paths. It found no
-credential, account, or external network dependency.
+The packaged crate was installed into a new Cargo root and exercised only
+through its installed `otel-token-meter` executable. It installed exactly one
+executable, reported version `0.1.0`, and completed `demo --json` with five
+spans and four populated project rows. Its generated CSV had five CRLF records
+(five `\r\n`, five `\n`, and five `\r`). Missing input exited 1 and an unknown
+command exited 2.
 
-## Live evidence
+The installed loopback collector returned health with aggregate-only mode,
+version, and build; then returned 200 for valid OTLP JSON, 400 for malformed
+JSON, 415 for `Content-Encoding: br`, and 200 for the immediate valid recovery
+request. Its two accepted requests remained after a stop/restart. The clean
+unit gate also passed the 64 MiB decompressed-gzip boundary test. Tenant
+isolation and 429/`Retry-After` are not applicable: this is a local,
+single-user CLI collector, not a hosted multi-tenant backend.
 
-The static deployment succeeded for the existing `sf-otel-token-meter` app.
-Its live footer build ID is `3bde59e0ae92`, matching the implementation source.
-Fresh desktop and phone browser contexts verified the first-screen job, audience,
-and **Try it with sample data** action before scrolling. The realistic demo
-showed four populated rows and five requests, retained its persistent sample
-label, reset to project grouping, and did not change a real-data sentinel.
+## Live site, demo, accessibility, privacy, and offline use
 
-Live browser checks passed these paths:
+Fresh desktop and phone contexts entered the demo with one click. The demo
+showed five realistic coding-agent requests, 1.61M tokens, 827 ms average
+latency, two errors, and four populated project rows. The persistent banner
+read **Demo — sample data, nothing is saved**. Reset restored the project view;
+the non-demo local-storage sentinel remained unchanged; and **Start for real**
+removed demo-prefixed keys while preserving the sentinel.
 
-- Root, demo, privacy, and terms: HTTP 200 with route-specific title, one h1,
-  main landmark, common navigation, and zero axe violations.
-- Unknown route: intentional HTTP 404 with the designed product recovery page.
-- Phone: 390/390 document width, keyboard-ready controls, and reduced-motion
-  transitions removed.
-- Privacy/offline: demo requests stayed same-origin, no cookie was created, and
-  an offline reload retained the populated demo.
-- URL verifier: no console/page error, valid title/lang/main/alt/button labels.
-- Mobile Lighthouse: performance 100, accessibility 100, best practices 100,
-  SEO 100; LCP 1,131 ms, CLS 0, TBT 51 ms, 52,494 B transfer.
+- Phone root and demo width: exactly 390 px client width and 390 px scroll
+  width; no horizontal overflow.
+- ArrowRight moved the focused grouping from Model to Tool. Browser CSV export
+  downloaded four populated tool rows.
+- Reduced motion set transitions to `0s` and animation to `none`.
+- A fresh service-worker-controlled demo context reloaded offline with the
+  title, persistent label, and four rows intact.
+- Root, demo, privacy, and terms returned 200 with route-specific titles,
+  `lang=en`, one h1, a main landmark, shared navigation, skip link, and footer.
+  The deliberate unknown route returned a styled product 404 with a recovery
+  path; that HTTP 404 is expected, not a defect.
+- Axe WCAG 2 A/AA reported zero violations on root, demo, privacy, terms, and
+  the styled 404. The required `verify-url.sh` check reported no console/page
+  error, missing alt text, missing title/lang/main, or unlabelled button.
+- Full-demo browser requests stayed on `https://otel-token-meter.sociobot.in`;
+  browser cookies were empty. Live headers provide HTTPS/HSTS, a self-only CSP,
+  `nosniff`, strict referrer policy, and restricted device permissions.
+- Every internal destination and the public repository link returned 200.
+- Fresh mobile Lighthouse: performance **100**, accessibility **100**, best
+  practices **100**, SEO **100**; LCP **1,163 ms**, CLS **0**, TBT **55 ms**,
+  transfer **52,448 B**.
 
-## Earlier findings
+## Earlier finding disposition
 
-All items in `verification.md`, `verification-2.md`, `verification-3.md`,
-`review-1.md`, and `review-2.md` are resolved. The former verification-3
-statement of zero untested claims was superseded by review 2; this repair adds
-the missing coverage and corrects the CSV implementation, so it is now true.
+| Earlier finding | Current disposition | Current evidence |
+| --- | --- | --- |
+| High: no isolated CLI/web demo sandbox | Resolved | Installed `demo` creates its own temporary output; live `/demo/` is labelled, resettable, and clears only `demo:` browser keys. |
+| High: no claims manifest or tagged claim tests | Resolved | Manifest has 21 entries; all exact commands passed separately. |
+| Medium: generic host 404 | Resolved | Unknown live URL returns product title, h1, main, navigation, styling, recovery, and expected 404 status. |
+| Low: incomplete metadata/navigation | Resolved | Each public route has its own title and common skeleton; live route checks passed. |
+| High: 390 px overflow | Resolved | Fresh root and demo phone contexts measured 390/390. |
+| Low: health omitted version/build | Resolved | Installed `/health` returned aggregate-only status, `0.1.0`, and `3bde59e0ae92`. |
+| High: CLI demo/protobuf/no-outbound/single-binary promises untested | Resolved | Four dedicated tagged outcome tests passed independently. |
+| Low: claimed RFC 4180 CSV used LF records | Resolved | Installed artifact produced CRLF records; the dedicated claim test passed. |
 
 ## Evidence
 
-- `/work/.evidence/otel-repair-3/claims/`
-- `/work/.evidence/otel-repair-3/consumer-demo.json`
-- `/work/.evidence/otel-repair-3/consumer-restart-report.json`
-- `/work/.evidence/otel-repair-3/live-browser.json`
-- `/work/.evidence/otel-repair-3/verify-url/verify.json`
-- `/work/.evidence/otel-repair-3/lighthouse-live.json`
+- `/work/.evidence/qa-npm-test.log`
+- `/work/.evidence/qa-quality-gates.log`
+- `/work/.evidence/qa-browser.log`
+- `/work/.evidence/qa-claims-combined.log`
+- `/work/.evidence/qa-claims-individual.tsv` and
+  `/work/.evidence/qa-claims-individual/`
+- `/work/.evidence/qa-consumer-demo.json` and
+  `/work/.evidence/qa-restart-http-report.json`
+- `/work/.evidence/qa-live-browser.json`,
+  `/work/.evidence/qa-live-interaction.json`, and live screenshots
+- `/work/.evidence/qa-verify-url/verify.json`
+- `/work/.evidence/qa-lighthouse-live.json`
