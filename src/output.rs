@@ -112,11 +112,11 @@ pub fn table(report: &Report) -> String {
 }
 
 pub fn csv(report: &Report) -> String {
-    let mut out = format!("{},requests,input_tokens,output_tokens,total_tokens,cache_read_tokens,cache_write_tokens,avg_latency_ms,errors,cost_usd\n", report.group_by);
+    let mut out = format!("{},requests,input_tokens,output_tokens,total_tokens,cache_read_tokens,cache_write_tokens,avg_latency_ms,errors,cost_usd\r\n", report.group_by);
     for row in &report.rows {
         out.push_str(
             &format!(
-                "{},,{},{},{},{},{},{:.3},{},{:.6}\n",
+                "{},,{},{},{},{},{},{:.3},{},{:.6}\r\n",
                 csv_field(&row.name),
                 row.metrics.input_tokens,
                 row.metrics.output_tokens,
@@ -166,5 +166,14 @@ mod tests {
         );
         let value = csv(&report(&store, GroupBy::Project));
         assert!(value.contains("\"a, \"\"team\"\"\",1,4,2,6"));
+        assert!(value.ends_with("\r\n"));
+        assert!(value
+            .as_bytes()
+            .windows(2)
+            .any(|bytes| bytes == b"\r\n"));
+        assert!(value
+            .bytes()
+            .enumerate()
+            .all(|(index, byte)| byte != b'\n' || index > 0 && value.as_bytes()[index - 1] == b'\r'));
     }
 }

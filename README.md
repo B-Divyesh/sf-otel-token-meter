@@ -20,7 +20,7 @@ The demo reloads offline after its first visit. Its sample totals match the CLI 
 
 ## Install
 
-Build the single executable with Rust 1.85 or newer:
+Build one executable with Rust 1.85 or newer:
 
 ```sh
 cargo install --path .
@@ -50,7 +50,7 @@ otel-token-meter export --data ./token-meter.json --group-by tool --output usage
 otel-token-meter ingest traces.json --data ./token-meter.json --json
 ```
 
-Reports use a readable table or stable JSON. Exports use CSV.
+Reports use a readable table or stable JSON. Exports use RFC 4180 CSV records with CRLF line endings.
 
 Commands do not prompt. Success exits `0`, data or I/O failures exit `1`, and usage errors exit `2`.
 
@@ -97,7 +97,7 @@ Duration comes from span start and end times.
 
 ## Develop and verify
 
-Use Node 22, Rust 1.85 or newer, and the pinned Playwright browser:
+Use Node 22, Rust 1.85 or newer, a C compiler for the network-observer check, and the pinned Playwright browser:
 
 ```sh
 npm ci

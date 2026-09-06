@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { spawn, spawnSync } from 'node:child_process';
 import { once } from 'node:events';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { tmpdir } from 'node:os';
 import { gzipSync } from 'node:zlib';
 
@@ -32,6 +32,70 @@ function runDemo() {
   const result = run(['demo', '--output', output, '--json']);
   expect(result.status, result.stderr).toBe(0);
   return { directory, output, receipt: JSON.parse(result.stdout) };
+}
+
+function protobufVarint(value: number | bigint) {
+  let remaining = BigInt(value);
+  const bytes: number[] = [];
+  do {
+    let byte = Number(remaining & 0x7fn);
+    remaining >>= 7n;
+    if (remaining > 0n) byte |= 0x80;
+    bytes.push(byte);
+  } while (remaining > 0n);
+  return Buffer.from(bytes);
+}
+
+function protobufMessage(field: number, body: Buffer) {
+  return Buffer.concat([protobufVarint((field << 3) | 2), protobufVarint(body.length), body]);
+}
+
+function protobufString(field: number, value: string) {
+  return protobufMessage(field, Buffer.from(value));
+}
+
+function protobufInt(field: number, value: number) {
+  return Buffer.concat([protobufVarint(field << 3), protobufVarint(value)]);
+}
+
+function protobufFixed64(field: number, value: bigint) {
+  const bytes = Buffer.alloc(8);
+  bytes.writeBigUInt64LE(value);
+  return Buffer.concat([protobufVarint((field << 3) | 1), bytes]);
+}
+
+function protobufKeyValue(key: string, value: Buffer) {
+  return Buffer.concat([protobufString(1, key), protobufMessage(2, value)]);
+}
+
+function oneSpanOtlpProtobuf() {
+  const stringValue = (value: string) => protobufString(1, value);
+  const integerValue = (value: number) => protobufInt(3, value);
+  const resource = Buffer.concat([
+    protobufMessage(1, protobufKeyValue('service.namespace', stringValue('protobuf-project'))),
+    protobufMessage(1, protobufKeyValue('service.name', stringValue('protobuf-tool'))),
+  ]);
+  const span = Buffer.concat([
+    protobufString(5, 'protobuf-token-count'),
+    protobufFixed64(7, 1_000_000n),
+    protobufFixed64(8, 101_000_000n),
+    protobufMessage(9, protobufKeyValue('gen_ai.request.model', stringValue('protobuf-model'))),
+    protobufMessage(9, protobufKeyValue('gen_ai.usage.input_tokens', integerValue(123))),
+    protobufMessage(9, protobufKeyValue('gen_ai.usage.output_tokens', integerValue(45))),
+  ]);
+  const scopeSpans = protobufMessage(2, span);
+  const resourceSpans = Buffer.concat([protobufMessage(1, resource), protobufMessage(2, scopeSpans)]);
+  return protobufMessage(1, resourceSpans);
+}
+
+function compileNetworkObserver(directory: string) {
+  const library = join(directory, 'network-observer.so');
+  const result = spawnSync('cc', ['-Wall', '-Wextra', '-Werror', '-shared', '-fPIC', '-o', library, 'tests/claims/network-observer.c'], {
+    encoding: 'utf8',
+    timeout: 20_000,
+  });
+  expect(result.status, result.stderr).toBe(0);
+  return library;
 }
 
 async function freePort() {
@@ -121,7 +185,7 @@ test('@claim:aggregate-only-storage persists counters without trace content', ()
   expect(Object.values(ledger.aggregates)).toHaveLength(5);
 });
 
-test('@claim:no-account-or-telemetry runs the complete demo without credentials or a reachable proxy', () => {
+test('@claim:no-account-or-telemetry runs the complete demo without credentials or a reachable model proxy', () => {
   const directory = temporaryDirectory();
   const result = run(['demo', '--output', join(directory, 'demo'), '--json'], {
     cwd: directory,
@@ -130,6 +194,26 @@ test('@claim:no-account-or-telemetry runs the complete demo without credentials 
   expect(result.status, result.stderr).toBe(0);
   expect(JSON.parse(result.stdout)).toMatchObject({ accepted_spans: 5, privacy: 'aggregate-only' });
   expect(result.stderr).toBe('');
+});
+
+test('@claim:no-outbound-cli-requests completes the demo while a network observer records and rejects outbound attempts', () => {
+  const directory = temporaryDirectory();
+  const log = join(directory, 'network-attempts.log');
+  const observer = compileNetworkObserver(directory);
+  const result = run(['demo', '--output', join(directory, 'demo'), '--json'], {
+    cwd: directory,
+    env: {
+      ...process.env,
+      HTTP_PROXY: 'http://127.0.0.1:9',
+      HTTPS_PROXY: 'http://127.0.0.1:9',
+      NO_PROXY: '',
+      LD_PRELOAD: observer,
+      OTEL_TOKEN_METER_NETWORK_LOG: log,
+    },
+  });
+  expect(result.status, result.stderr).toBe(0);
+  expect(JSON.parse(result.stdout)).toMatchObject({ accepted_spans: 5, privacy: 'aggregate-only' });
+  expect(readFileSync(log, 'utf8')).toBe('observer-ready\n');
 });
 
 test('@claim:health-identity reports mode, semantic version, and build identity', async () => {
@@ -171,15 +255,82 @@ test('@claim:report-outputs emits a readable table and stable parseable JSON', (
   expect(JSON.parse(first.stdout)).toMatchObject({ group_by: 'project', totals: { requests: 5 }, rows: expect.any(Array) });
 });
 
-test('@claim:csv-export writes one valid row for each project group', () => {
+test('@claim:csv-export writes RFC 4180 records with CRLF separators and one row for each project group', () => {
   const demo = runDemo();
   const output = join(demo.directory, 'project.csv');
   const result = run(['export', '--data', join(demo.output, 'aggregate-ledger.json'), '--group-by', 'project', '--output', output]);
   expect(result.status, result.stderr).toBe(0);
-  const lines = readFileSync(output, 'utf8').trim().split('\n');
+  const csv = readFileSync(output, 'utf8');
+  expect(csv.endsWith('\r\n')).toBe(true);
+  expect([...csv.matchAll(/(?<!\r)\n/g)]).toHaveLength(0);
+  const lines = csv.trim().split('\r\n');
   expect(lines[0]).toBe('project,requests,input_tokens,output_tokens,total_tokens,cache_read_tokens,cache_write_tokens,avg_latency_ms,errors,cost_usd');
   expect(lines).toHaveLength(5);
   expect(lines.find(line => line.startsWith('"checkout-agent",'))).toContain(',2,797320,142530,939850,423320,0,1024.000,1,');
+});
+
+test('@claim:cli-demo-isolation creates separate temporary sample directories without changing the working directory', () => {
+  const directory = temporaryDirectory();
+  const sentinel = join(directory, 'real-ledger.json');
+  writeFileSync(sentinel, 'real data stays unchanged');
+  const runDefaultDemo = () => {
+    const result = run(['demo'], { cwd: directory });
+    expect(result.status, result.stderr).toBe(0);
+    const outputDirectory = result.stdout.match(/^Sample files: (.+)$/m)?.[1];
+    expect(outputDirectory).toBeTruthy();
+    expect(outputDirectory).not.toBe(directory);
+    expect(relative(tmpdir(), outputDirectory!).startsWith('..')).toBe(false);
+    temporaryDirectories.push(outputDirectory!);
+    return outputDirectory!;
+  };
+  const first = runDefaultDemo();
+  const second = runDefaultDemo();
+  expect(second).not.toBe(first);
+  for (const output of [first, second]) {
+    expect(readFileSync(join(output, 'sample-traces.json'), 'utf8')).toBe(readFileSync('examples/demo-traces.json', 'utf8'));
+    expect(readFileSync(join(output, 'prices.json'), 'utf8')).toBe(readFileSync('examples/demo-prices.json', 'utf8'));
+    const ledger = JSON.parse(readFileSync(join(output, 'aggregate-ledger.json'), 'utf8'));
+    expect(Object.values(ledger.aggregates).reduce((sum: number, row: any) => sum + row.requests, 0)).toBe(5);
+    expect(readFileSync(join(output, 'usage-by-project.csv'), 'utf8')).toContain('checkout-agent');
+  }
+  expect(readFileSync(sentinel, 'utf8')).toBe('real data stays unchanged');
+  expect(readdirSync(directory).sort()).toEqual(['real-ledger.json']);
+});
+
+test('@claim:file-protobuf-ingest imports a one-span OTLP protobuf file into the aggregate ledger', () => {
+  const directory = temporaryDirectory();
+  const input = join(directory, 'captured-trace.pb');
+  const data = join(directory, 'ledger.json');
+  writeFileSync(input, oneSpanOtlpProtobuf());
+  const ingest = run(['ingest', input, '--data', data, '--json']);
+  expect(ingest.status, ingest.stderr).toBe(0);
+  expect(JSON.parse(ingest.stdout)).toMatchObject({ accepted_spans: 1, privacy: 'aggregate-only' });
+  const report = JSON.parse(run(['report', '--data', data, '--group-by', 'project', '--json']).stdout);
+  expect(report.rows).toEqual([expect.objectContaining({
+    name: 'protobuf-project',
+    total_tokens: 168,
+    input_tokens: 123,
+    output_tokens: 45,
+    duration_ms: 100,
+  })]);
+});
+
+test('@claim:single-binary-distribution installs one executable from the packaged crate in a clean consumer root', () => {
+  const directory = temporaryDirectory();
+  const packaged = spawnSync('cargo', ['package', '--allow-dirty'], { encoding: 'utf8', timeout: 120_000 });
+  expect(packaged.status, packaged.stderr).toBe(0);
+  const packageDirectory = join(process.cwd(), 'target/package/otel-token-meter-0.1.0');
+  const installRoot = join(directory, 'consumer');
+  const installed = spawnSync('cargo', [
+    'install', '--debug', '--path', packageDirectory, '--root', installRoot, '--target-dir', join(process.cwd(), 'target'),
+  ], { encoding: 'utf8', timeout: 120_000 });
+  expect(installed.status, installed.stderr).toBe(0);
+  const bin = join(installRoot, 'bin');
+  const programs = readdirSync(bin).filter(name => statSync(join(bin, name)).isFile());
+  expect(programs).toEqual(['otel-token-meter']);
+  const version = spawnSync(join(bin, 'otel-token-meter'), ['--version'], { encoding: 'utf8', timeout: 20_000 });
+  expect(version.status, version.stderr).toBe(0);
+  expect(version.stdout.trim()).toBe('otel-token-meter 0.1.0');
 });
 
 test('@claim:exit-codes distinguishes success, data failure, and usage errors', () => {

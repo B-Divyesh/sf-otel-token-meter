@@ -22,10 +22,17 @@
   },
   {
     "id": "no-account-or-telemetry",
-    "claim": "The CLI runs without an account, model proxy, or product telemetry.",
+    "claim": "The CLI runs without an account or model proxy.",
     "where": "landing page, privacy page, README",
     "test": "npm run test:claims -- --grep \"@claim:no-account-or-telemetry\"",
     "sandbox": "minimal credential-free environment with unreachable HTTP proxy; run the isolated demo non-interactively"
+  },
+  {
+    "id": "no-outbound-cli-requests",
+    "claim": "The CLI makes no outbound requests or product telemetry calls.",
+    "where": "privacy page",
+    "test": "npm run test:claims -- --grep \"@claim:no-outbound-cli-requests\"",
+    "sandbox": "run the bundled demo under a preload network observer that records and rejects TCP and UDP send attempts"
   },
   {
     "id": "health-identity",
@@ -50,10 +57,31 @@
   },
   {
     "id": "csv-export",
-    "claim": "Exports grouped totals as CSV.",
+    "claim": "Exports grouped totals as RFC 4180 CSV with CRLF record separators.",
     "where": "landing page, README",
     "test": "npm run test:claims -- --grep \"@claim:csv-export\"",
-    "sandbox": "fresh CLI demo ledger; parse the exported header and one row per group"
+    "sandbox": "fresh CLI demo ledger; inspect raw record separators, header, and one row per group"
+  },
+  {
+    "id": "cli-demo-isolation",
+    "claim": "The CLI demo creates a new temporary directory, writes its sample, ledger, and CSV there, and prints the directory.",
+    "where": "landing page, demo page, README, demo documentation",
+    "test": "npm run test:claims -- --grep \"@claim:cli-demo-isolation\"",
+    "sandbox": "run the default bundled CLI demo twice from a fresh working directory containing a sentinel file"
+  },
+  {
+    "id": "file-protobuf-ingest",
+    "claim": "The file-based ingest command imports OTLP protobuf requests.",
+    "where": "CLI help",
+    "test": "npm run test:claims -- --grep \"@claim:file-protobuf-ingest\"",
+    "sandbox": "write a real one-span OTLP protobuf request to a fresh .pb file, ingest it, and inspect the stored report"
+  },
+  {
+    "id": "single-binary-distribution",
+    "claim": "The release package installs one otel-token-meter executable.",
+    "where": "landing page, README",
+    "test": "npm run test:claims -- --grep \"@claim:single-binary-distribution\"",
+    "sandbox": "package the crate, install it into a new Cargo root, list its executable directory, and run its version command"
   },
   {
     "id": "exit-codes",
