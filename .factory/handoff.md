@@ -1,18 +1,19 @@
-# OTel Token Meter handoff — verification 4 PASS
+# OTel Token Meter handoff — review 3 FAIL
 
 - **Live URL:** https://otel-token-meter.sociobot.in/
 - **Implementation/deployed product candidate:** `3bde59e0ae9225a7f7c2fc8602cbd170587494cc`
-- **Documentation/report commit before this handoff:** `d5ec335fb31415c6e55f82a1a3d7d3eaaf622f85`
-- **Result:** PASS — zero findings and zero untested public claims.
+- **Documentation/report commit before this handoff:** `e290205ac6f56669704b6a749fb07d46c1af0f27`
+- **Result:** FAIL — 1 low-severity finding and 0 untested public claims.
 
-## What is available
+## What was checked
 
-The Rust CLI receives OTLP/HTTP JSON or protobuf on loopback by default,
-retains aggregate token/cost/cache/latency/error totals only, groups reports by
-project/model/tool, and exports CRLF RFC 4180 CSV. `otel-token-meter demo`
-uses bundled sample data in a new temporary directory. The static site has an
-isolated `/demo/` sample, privacy and terms pages, offline demo reload, and a
-styled 404 page.
+The local CLI accepts OTLP/HTTP JSON and protobuf on loopback, retains only aggregate token/cost/cache/latency/error totals, groups reports, and exports CRLF CSV. Its isolated bundled demo and the site's labelled `/demo/` sample both passed. Fresh desktop and phone live checks also passed for reset and demo isolation, keyboard operation, focus structure, reduced motion, offline reload, accessible routes and legal pages, privacy requests/cookies, headers, and the styled 404.
+
+All 21 exact commands in `.factory/claims.json` were independently run from a clean checkout and passed. `npm test`, clippy, build, browser tests, and cargo package passed. The packaged artifact's dedicated clean-consumer claim passed.
+
+## Blocking finding
+
+`cargo fmt --all -- --check` fails under Rust 1.98.0 / rustfmt 1.9.0, despite the README documenting Rust 1.85 or newer and listing this command as a quality gate. It reports a required formatting change in `src/output.rs`. Format and commit the source with the supported toolchain, then repeat the clean-checkout quality list before declaring PASS.
 
 ## Run and verify
 
@@ -28,25 +29,12 @@ npm run test:claims
 cargo package --allow-dirty
 ```
 
-`npm run build` writes the release binary to `dist/bin/otel-token-meter` and
-the static site to `dist/site/`. A publishable package is prepared by `cargo
-package --allow-dirty`; registry publication remains factory-owned.
-
-Every one of the 21 exact commands in `.factory/claims.json` was independently
-run in a clean checkout at the implementation candidate and passed. The
-packaged CLI was installed into a separate consumer root; it completed the
-demo, emitted CRLF CSV, handled normal/invalid/recovery collector requests,
-and retained aggregates across restart. Live desktop/phone demo, reset and
-isolation, offline reload, routes/legal pages, keyboard/focus/reduced motion,
-privacy, axe, URL verifier, and mobile Lighthouse all passed.
+`npm run build` writes `dist/bin/otel-token-meter` and `dist/site/`.
 
 ## Known limits
 
 - OTLP/gRPC is outside the documented OTLP/HTTP interface.
-- This is a local, single-user collector; it has no hosted tenants or live
-  rate-limit policy, so tenant-isolation and 429/`Retry-After` checks do not
-  apply.
-- No registry publish, deployment configuration, billing, or infrastructure
-  change was made during verification.
+- This is a local, single-user collector, so hosted tenant isolation and 429/`Retry-After` checks do not apply.
+- No product code, deployment configuration, billing, or infrastructure was changed during the review.
 
-Detailed evidence is in `.factory/verification-4.md` and `/work/.evidence/`.
+Detailed evidence and the finding are in `.factory/review-3.md`.
