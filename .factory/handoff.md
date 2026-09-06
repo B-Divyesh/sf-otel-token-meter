@@ -1,4 +1,24 @@
-# OTel Token Meter handoff — repair 4 PASS
+# OTel Token Meter handoff — verification 5 PASS
+
+- **Current independent verification:** [`.factory/verification-5.md`](verification-5.md)
+- **Verdict:** PASS — zero findings and zero untested public claims.
+- **Implementation reviewed:** `2c813bae379dbfa746c24dcef3fa26d54b4746db`
+- **Documentation/live build SHA:** `6393df98aeec2bee8ee81c52f07b8e563632f8b1`
+
+Verification 5 used a fresh clone and fresh live desktop and phone contexts. It
+ran `npm ci`, all documented quality gates, the combined 21-claim suite, and
+every manifest claim command separately; all passed. The packaged clean
+consumer exercise, collector normal/invalid/recovery/restart paths, live demo
+reset and isolation, offline reload, accessibility, privacy, links, legal
+routes, expected styled 404, and Lighthouse also passed. No product code
+changed during this verification.
+
+The live output byte-matches a fresh `6393df9` build. `2c813ba` is the last
+product implementation change; later commits only update factory reports, so
+both SHAs are recorded. Evidence and the copied QA report are in
+`/work/.evidence/`.
+
+## Prior repair 4 handoff
 
 - **Live URL:** https://otel-token-meter.sociobot.in/
 - **Implementation and deployed build:** `2c813bae379dbfa746c24dcef3fa26d54b4746db`
