@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Try OTel Token Meter with a separate sample ledger that does not change your files.">
+  <meta name="theme-color" content="#f3ebd8">
+  <link rel="canonical" href="https://otel-token-meter.sociobot.in/demo/">
+  <meta property="og:type" content="website"><meta property="og:url" content="https://otel-token-meter.sociobot.in/demo/">
+  <meta property="og:title" content="Demo — OTel Token Meter"><meta property="og:description" content="Try OTel Token Meter with a separate sample ledger that does not change your files.">
+  <meta property="og:image" content="https://otel-token-meter.sociobot.in/og-trace-press.webp"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Demo — OTel Token Meter"><meta name="twitter:description" content="Try OTel Token Meter with a separate sample ledger that does not change your files."><meta name="twitter:image" content="https://otel-token-meter.sociobot.in/og-trace-press.webp">
+  <title>Demo — OTel Token Meter</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="stylesheet" href="/src/styles.css">
+</head>
+<body data-page="demo">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header"><nav class="nav wrap" aria-label="Primary navigation"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a><div class="nav-links"><a aria-current="page" href="/demo/">Demo</a><a href="/#how">How it works</a><a href="/privacy/">Privacy</a><a class="button" href="/#install">Install</a></div></nav></header>
+  <aside class="demo-banner" aria-label="Demo status"><div class="wrap demo-banner-inner"><strong>Demo — sample data, nothing is saved</strong><div class="demo-banner-actions"><button id="reset-demo" type="button">Reset demo</button><a id="start-real" href="/#install">Start for real</a></div><span id="demo-status" role="status"></span></div></aside>
+  <main id="main">
+    <section class="demo-page-intro"><div class="wrap"><div class="eyebrow">Separate sample workspace</div><h1>Review a sample token ledger</h1><p class="lede">This sample shows teams how five coding-agent spans become local totals.</p></div></section>
+    <section class="demo-page-ledger" aria-labelledby="ledger-title"><div class="wrap"><div class="section-head"><div><h2 id="ledger-title">Group the recorded spans</h2></div><p>Change the grouping, test the empty state, or export the current rows.</p></div>
+      <div class="demo-shell"><div class="demo-top"><div class="collector-status"><i aria-hidden="true"></i> Sample ready</div><div class="demo-label">Demo — no real data</div></div><div class="demo-summary" aria-label="Sample totals"><div class="demo-stat"><strong data-total="requests">5</strong><span>requests</span></div><div class="demo-stat"><strong data-total="tokens">1.61M</strong><span>tokens</span></div><div class="demo-stat"><strong data-total="latency">827 ms</strong><span>average latency</span></div><div class="demo-stat"><strong data-total="errors">2</strong><span>errors</span></div></div>
+        <div class="demo-tools"><div class="tabs" role="tablist" aria-label="Group sample ledger"><button class="tab" id="tab-project" role="tab" aria-controls="demo-table" aria-selected="true" tabindex="0" data-group="project">Project</button><button class="tab" id="tab-model" role="tab" aria-controls="demo-table" aria-selected="false" tabindex="-1" data-group="model">Model</button><button class="tab" id="tab-tool" role="tab" aria-controls="demo-table" aria-selected="false" tabindex="-1" data-group="tool">Tool</button></div><div class="tool-actions"><button class="button secondary" id="empty-toggle" type="button">Show empty state</button><button class="button" id="export" type="button">Export CSV</button></div></div><div class="export-note" id="export-note" role="status"></div><div class="table-wrap" id="demo-table" role="tabpanel" tabindex="0" aria-labelledby="tab-project" aria-label="Sample usage ledger" aria-live="polite"></div>
+      </div>
+    </div></section>
+    <section class="demo-details" aria-labelledby="sample-title"><div class="wrap"><h2 id="sample-title">Run the same sample in the CLI</h2><p>The repository ships this OTLP fixture and its local price book.</p><pre class="install-command"><code>otel-token-meter demo</code></pre><p>The command writes a ledger and CSV to a new temporary directory. It prints that directory when it finishes.</p></div></section>
+  </main>
+  <footer class="site-footer"><div class="wrap footer-grid"><div><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a><p>Local token and latency accounting from OTLP traces.</p></div><div class="footer-links"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><span>Built by Param Factory</span><span>v0.1.0 · build __BUILD_ID__</span></div></div></footer>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

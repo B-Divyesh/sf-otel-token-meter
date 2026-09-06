@@ -5,15 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config site/vite.config.ts",
-    "build:site": "vite build --config site/vite.config.ts",
+    "preview": "node scripts/serve-site.mjs",
+    "build:site": "vite build --config site/vite.config.ts && node scripts/finalize-site.mjs",
     "build:cli": "cargo build --release && node scripts/copy-binary.mjs",
     "build": "npm run build:cli && npm run build:site",
     "test": "cargo test && npm run build:site && node scripts/site-test.mjs",
-    "test:browser": "npm run build && playwright test"
+    "test:browser": "npm run build && playwright test",
+    "test:claims": "npm run build && playwright test --config playwright.claims.config.ts"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.11.1",
-    "@playwright/test": "^1.58.2",
+    "@axe-core/playwright": "4.11.1",
+    "@playwright/test": "1.58.2",
     "typescript": "^5.9.2",
     "vite": "^7.1.3"
   }

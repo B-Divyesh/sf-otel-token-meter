@@ -184,5 +184,20 @@ mod tests {
             decode_content(b"{}", "br").unwrap_err().0,
             StatusCode::UNSUPPORTED_MEDIA_TYPE
         );
+        assert_eq!(
+            decode_content(b"not gzip", "gzip").unwrap_err().0,
+            StatusCode::BAD_REQUEST
+        );
+    }
+
+    #[test]
+    fn rejects_gzip_payload_over_the_decompressed_limit() {
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
+        encoder.write_all(&vec![0; 64 * 1024 * 1024 + 1]).unwrap();
+        let compressed = encoder.finish().unwrap();
+        assert_eq!(
+            decode_content(&compressed, "gzip").unwrap_err().0,
+            StatusCode::PAYLOAD_TOO_LARGE
+        );
     }
 }

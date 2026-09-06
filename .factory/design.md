@@ -43,6 +43,8 @@ Only state change moves. New readings rise 8 px and fade in over 180 ms; button 
 ## Original asset plan and provenance
 
 - `site/public/trace-press.webp`: original generated editorial halftone illustration of a compact field meter converting dotted traces into aggregate paper bands. It has no text, logos, people, or interface screenshots, so the adjacent live HTML remains authoritative and accessible. Generated for this repository with `/opt/fleet/lib/gen-image.sh` using the factory image deployment, then converted with `cwebp`; licensed under the repository MIT license.
+- `site/public/og-trace-press.webp`: 1200×630 center crop of the original trace press art, made locally with ImageMagick for route social cards.
+- `site/public/apple-touch-icon.png`: hand-rendered 180×180 raster of the repository favicon geometry, made locally with ImageMagick in the product palette.
 - CSS dot screens, registration marks, status glyphs, and chart patterns are hand-authored for this product and contain no external assets.
 
 Generation prompt: “Wide editorial hero illustration for a privacy-first developer tool. A compact analog token-counting instrument on warm uncoated paper, receiving several dotted telemetry trace lines on the left and outputting four clean aggregate ledger bands on the right; raw message fragments visibly dissolve before entering the instrument. Two-ink risograph / newspaper halftone print, dark carbon black, deep meter green and one signal-orange accent, visible misregistration and stipple texture, bold geometric forms, generous negative space, no gradients, no photorealism, no people, no brand marks, no legible text, no UI screenshot, no watermark. 3:2 landscape composition.”

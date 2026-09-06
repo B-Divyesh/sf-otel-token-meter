@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>Local dashboard · OTel Token Meter</title>
+  <title>Local dashboard — OTel Token Meter</title>
   <style>
     :root{--paper:#f3ebd8;--sheet:#fff9eb;--ink:#18201b;--muted:#536057;--green:#176b45;--orange:#a83a1d;--brass:#815500;--rule:#777a6e;font:16px/1.55 ui-monospace,SFMono-Regular,Cascadia Code,Liberation Mono,monospace;color:var(--ink);background:var(--paper)}
     *{box-sizing:border-box}body{margin:0}a{color:inherit}button,select{font:inherit;color:inherit}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--orange);outline-offset:3px}.skip{position:absolute;left:8px;top:-80px;background:var(--ink);color:var(--sheet);padding:12px;z-index:2}.skip:focus{top:8px}
@@ -20,7 +20,7 @@
 <a class="skip" href="#main">Skip to ledger</a>
 <header><div class="brand">OTel / Token Meter</div><div class="status" id="status"><span class="dot" aria-hidden="true"></span><span>Collector live</span></div></header>
 <main id="main">
-  <h1>Your traces, reduced to evidence.</h1>
+  <h1>Review local token and latency totals</h1>
   <p class="lead">Aggregate token usage on this machine. Prompts, completions, trace IDs, and span events never enter the ledger.</p>
   <section class="totals" aria-label="Usage totals">
     <div class="metric"><strong id="requests">—</strong><span>requests</span></div><div class="metric"><strong id="tokens">—</strong><span>tokens</span></div><div class="metric"><strong id="latency">—</strong><span>average latency</span></div><div class="metric"><strong id="errors">—</strong><span>errors</span></div>

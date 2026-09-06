@@ -83,6 +83,36 @@ fn documented_ingest_report_and_export_workflow() {
 }
 
 #[test]
+fn bundled_demo_uses_an_isolated_directory() {
+    let dir = tempfile::tempdir().unwrap();
+    let real_data = dir.path().join("token-meter.json");
+    fs::write(&real_data, "real data stays unchanged").unwrap();
+    let demo_dir = dir.path().join("demo-output");
+
+    let output = Command::new(BIN)
+        .current_dir(dir.path())
+        .args(["demo", "--output", demo_dir.to_str().unwrap(), "--json"])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let receipt: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(receipt["accepted_spans"], 5);
+    assert_eq!(receipt["privacy"], "aggregate-only");
+    assert_eq!(receipt["report"]["totals"]["requests"], 5);
+    assert_eq!(receipt["report"]["rows"].as_array().unwrap().len(), 4);
+    assert_eq!(
+        fs::read_to_string(real_data).unwrap(),
+        "real data stays unchanged"
+    );
+    assert!(demo_dir.join("aggregate-ledger.json").is_file());
+    assert!(demo_dir.join("usage-by-project.csv").is_file());
+}
+
+#[test]
 fn http_collector_serves_dashboard_and_reports_errors() {
     let dir = tempfile::tempdir().unwrap();
     let data = dir.path().join("meter.json");
@@ -114,7 +144,7 @@ fn http_collector_serves_dashboard_and_reports_errors() {
         "GET / HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
     );
     assert!(home.starts_with("HTTP/1.1 200"));
-    assert!(home.contains("Your traces, reduced to evidence."));
+    assert!(home.contains("Review local token and latency totals"));
 
     let health = request(
         addr,
@@ -132,10 +162,39 @@ fn http_collector_serves_dashboard_and_reports_errors() {
     let bad = request(addr, "POST /v1/traces HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 1\r\nConnection: close\r\n\r\n{");
     assert!(bad.starts_with("HTTP/1.1 400"));
     assert!(bad.contains("next"));
+    let recovered = request(addr, &format!("POST /v1/traces HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}", body.len(), body));
+    assert!(recovered.starts_with("HTTP/1.1 200"));
     assert!(data.exists());
 
     child.kill().unwrap();
     child.wait().unwrap();
+
+    let mut restarted = Command::new(BIN)
+        .args([
+            "serve",
+            "--listen",
+            &addr.to_string(),
+            "--data",
+            data.to_str().unwrap(),
+        ])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    for _ in 0..50 {
+        if TcpStream::connect(addr).is_ok() {
+            break;
+        }
+        thread::sleep(Duration::from_millis(20));
+    }
+    let persisted = request(
+        addr,
+        "GET /api/report?group_by=project HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
+    );
+    assert!(persisted.starts_with("HTTP/1.1 200"));
+    assert!(persisted.contains("\"requests\":2"));
+    restarted.kill().unwrap();
+    restarted.wait().unwrap();
 }
 
 fn request(addr: SocketAddr, request: &str) -> String {

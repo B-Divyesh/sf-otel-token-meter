@@ -1,50 +1,64 @@
 # OTel Token Meter
 
-Local, vendor-neutral token, cost, cache, latency, and error accounting from OpenTelemetry traces. It accepts OTLP/HTTP from coding agents and LLM apps, drops trace bodies, stores aggregates on disk, and serves a private dashboard. No account, model proxy, or telemetry of its own.
+Count token, cost, cache, latency, and error totals from OpenTelemetry traces. This CLI is for teams running coding agents and LLM apps.
+
+It accepts OTLP/HTTP, drops trace content, and stores grouped totals on your machine. It has no account, model proxy, or product telemetry.
+
+## Try the sample
+
+Open the [separate website demo](https://otel-token-meter.sociobot.in/demo/) or run the bundled sample:
+
+```sh
+otel-token-meter demo
+```
+
+The command creates a new temporary directory. It writes the sample, aggregate ledger, and CSV there, then prints the path.
+
+The website demo uses only keys prefixed with `demo:otel-token-meter:`. Resetting or leaving the demo removes those keys without changing other browser data.
+
+The demo reloads offline after its first visit. Its sample totals match the CLI demo and local dashboard.
 
 ## Install
 
-Download a release binary, or build the single executable with Rust 1.85+:
+Build the single executable with Rust 1.85 or newer:
 
 ```sh
 cargo install --path .
 otel-token-meter --help
 ```
 
-## Usage
+The factory prepares release packages. Registry publication happens outside this repository.
 
-Start the OTLP collector and dashboard:
+## Collect traces
+
+Start the collector and local dashboard:
 
 ```sh
-otel-token-meter serve --listen 127.0.0.1:4318 --data ./token-meter.json \
-  --prices ./prices.json
+otel-token-meter serve --data ./token-meter.json --prices ./prices.json
 ```
 
-Point any OTLP/HTTP exporter to `http://127.0.0.1:4318`. Traces go to `/v1/traces`; the dashboard opens at `http://127.0.0.1:4318`. Both `application/x-protobuf` and OTLP JSON are accepted, with identity or gzip content encoding.
+The default collection address is `http://127.0.0.1:4318/v1/traces`. The dashboard uses `http://127.0.0.1:4318/`.
 
-`GET /health` returns the aggregate-only privacy mode plus the binary version and build ID, so local operators can identify the collector they are checking.
+The endpoint accepts OTLP/HTTP JSON and protobuf. It supports identity and gzip content encoding.
+
+Read or export the ledger:
 
 ```sh
-# Human-readable ledger
 otel-token-meter report --data ./token-meter.json --group-by project
-
-# Stable scripting output
 otel-token-meter report --data ./token-meter.json --group-by model --json
-
-# CSV for finance or capacity work
 otel-token-meter export --data ./token-meter.json --group-by tool --output usage.csv
-
-# Import a captured OTLP JSON payload without running a server
 otel-token-meter ingest traces.json --data ./token-meter.json --json
 ```
 
-Try the repository fixture end to end with `otel-token-meter ingest examples/sample-traces.json --data /tmp/token-meter.json --prices examples/prices.json`, then run `report` against the same data file.
+Reports use a readable table or stable JSON. Exports use CSV.
 
-The commands are non-interactive. Success exits `0`, command-line usage errors exit `2`, and invalid data, configuration, or I/O failures exit `1`.
+Commands do not prompt. Success exits `0`, data or I/O failures exit `1`, and usage errors exit `2`.
 
-### Optional cost estimates
+`GET /health` reports aggregate-only mode, version, and build ID.
 
-If a span supplies `gen_ai.usage.cost` or `llm.usage.total_cost`, that observed USD value wins. Otherwise, pass a local price book to `serve` or `ingest`:
+## Add local prices
+
+Supply an optional JSON price book to `serve` or `ingest`:
 
 ```json
 {
@@ -57,11 +71,17 @@ If a span supplies `gen_ai.usage.cost` or `llm.usage.total_cost`, that observed 
 }
 ```
 
-Keys match emitted model names exactly; `"*"` is an optional fallback. Cached input is subtracted from ordinary input before its cache rate is applied, avoiding double charges. Prices are read locally and are never fetched from a vendor.
+Keys match emitted model names. `"*"` is an optional fallback.
 
-### Supported semantic conventions
+An observed `gen_ai.usage.cost` or `llm.usage.total_cost` value takes priority. Otherwise, the CLI uses the local price book.
 
-| Metric | Attributes, in precedence order |
+The CLI does not fetch vendor prices. Missing prices produce a zero cost while preserving token totals.
+
+## Supported attributes
+
+Attributes are checked in the listed order. Missing project, model, or tool values become `unknown`.
+
+| Total | Attributes |
 | --- | --- |
 | Input tokens | `gen_ai.usage.input_tokens`, `llm.usage.prompt_tokens`, `ai.prompt_tokens` |
 | Output tokens | `gen_ai.usage.output_tokens`, `llm.usage.completion_tokens`, `ai.completion_tokens` |
@@ -71,27 +91,39 @@ Keys match emitted model names exactly; `"*"` is an optional fallback. Cached in
 | Tool | span `gen_ai.operation.name`, then resource `service.name` |
 | Project | resource `service.namespace`, `project.id`, `deployment.environment.name` |
 | Error | OTLP span status `ERROR` or `error.type` |
-| Cost | `gen_ai.usage.cost`, `llm.usage.total_cost` (USD) |
+| Cost | `gen_ai.usage.cost`, `llm.usage.total_cost` in USD |
 
-Missing dimensions become `unknown`; they are never silently discarded. Duration comes from span start/end timestamps. Configure exporters not to send prompt bodies when possible; even if supplied, this collector neither maps nor persists them.
+Duration comes from span start and end times.
 
 ## Develop and verify
 
+Use Node 22, Rust 1.85 or newer, and the pinned Playwright browser:
+
 ```sh
-npm install
-npm test
-npm run build        # release binary + site at dist/site/
-npm run dev          # static site on localhost
+npm ci
 npx playwright install chromium
-npm run test:browser # desktop keyboard/a11y + exact 390 px layout checks
+npm test
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings
+npm run build
+npm run test:browser
+npm run test:claims
 cargo package --allow-dirty
 ```
 
-Rust tests cover protobuf/JSON ingestion, privacy exclusions, grouping, reports, and the documented workflow. Site tests check structural accessibility and asset budgets. The browser suite verifies the recorded landing ledger and populated local dashboard have no horizontal document overflow at a 390 px viewport, preserves keyboard tab switching, and reports no axe violations.
+Each public claim and its exact command is listed in [`.factory/claims.json`](.factory/claims.json). Tests use temporary CLI directories and fresh browser state.
+
+`npm run build` writes the release binary to `dist/bin/` and the static site to `dist/site/`.
+
+To deploy, upload `dist/site/` to the product's static host. Keep `staticwebapp.config.json` with the build.
 
 ## Data and privacy
 
-Only aggregate counters and timing totals are written to the `--data` JSON file. Span IDs, prompt/completion bodies, events, and individual trace records are not stored. The collector binds to loopback by default. Delete the JSON file to reset it. See the hosted [privacy policy](https://otel-token-meter.sociobot.in/privacy/) and [terms](https://otel-token-meter.sociobot.in/terms/).
+The collector stores aggregate counters and timing totals in the `--data` JSON file. It does not store trace bodies or individual spans.
+
+The default address is loopback. Delete the JSON file to reset your local ledger.
+
+The static website uses no cookies, analytics, remote fonts, or remote scripts. Read the [privacy policy](https://otel-token-meter.sociobot.in/privacy/).
 
 ## License
 

@@ -1,0 +1,121 @@
+[
+  {
+    "id": "accounting-groups",
+    "claim": "Groups token, cost, cache, latency, and error totals by project, model, or tool.",
+    "where": "landing page, README",
+    "test": "npm run test:claims -- --grep \"@claim:accounting-groups\"",
+    "sandbox": "bundled five-span CLI demo in a fresh temporary directory; inspect all three grouped reports"
+  },
+  {
+    "id": "otlp-http-formats",
+    "claim": "Accepts OTLP/HTTP JSON and protobuf with identity or gzip encoding.",
+    "where": "landing page, README",
+    "test": "npm run test:claims -- --grep \"@claim:otlp-http-formats\"",
+    "sandbox": "fresh loopback collector; post all four format and encoding combinations"
+  },
+  {
+    "id": "aggregate-only-storage",
+    "claim": "Drops trace content and stores aggregate totals only.",
+    "where": "landing page, privacy page, README",
+    "test": "npm run test:claims -- --grep \"@claim:aggregate-only-storage\"",
+    "sandbox": "bundled sample containing prompt, response, trace IDs, and status detail; inspect the persisted ledger"
+  },
+  {
+    "id": "no-account-or-telemetry",
+    "claim": "The CLI runs without an account, model proxy, or product telemetry.",
+    "where": "landing page, privacy page, README",
+    "test": "npm run test:claims -- --grep \"@claim:no-account-or-telemetry\"",
+    "sandbox": "minimal credential-free environment with unreachable HTTP proxy; run the isolated demo non-interactively"
+  },
+  {
+    "id": "health-identity",
+    "claim": "The health response identifies aggregate-only mode, version, and build.",
+    "where": "README",
+    "test": "npm run test:claims -- --grep \"@claim:health-identity\"",
+    "sandbox": "fresh loopback collector; inspect GET /health"
+  },
+  {
+    "id": "default-loopback",
+    "claim": "The collector listens on 127.0.0.1:4318 by default.",
+    "where": "landing page, privacy page, README",
+    "test": "npm run test:claims -- --grep \"@claim:default-loopback\"",
+    "sandbox": "start the collector without a listen argument and reach health through the documented loopback address"
+  },
+  {
+    "id": "report-outputs",
+    "claim": "Reports grouped totals as a readable table or stable JSON.",
+    "where": "landing page, README",
+    "test": "npm run test:claims -- --grep \"@claim:report-outputs\"",
+    "sandbox": "fresh CLI demo ledger; run both report formats and parse the JSON contract"
+  },
+  {
+    "id": "csv-export",
+    "claim": "Exports grouped totals as CSV.",
+    "where": "landing page, README",
+    "test": "npm run test:claims -- --grep \"@claim:csv-export\"",
+    "sandbox": "fresh CLI demo ledger; parse the exported header and one row per group"
+  },
+  {
+    "id": "exit-codes",
+    "claim": "Commands exit 0 on success, 1 on data or I/O failure, and 2 on usage errors.",
+    "where": "README",
+    "test": "npm run test:claims -- --grep \"@claim:exit-codes\"",
+    "sandbox": "run a successful demo, a missing input, and an unknown command"
+  },
+  {
+    "id": "local-price-book",
+    "claim": "Uses a local price book and does not fetch vendor prices.",
+    "where": "README",
+    "test": "npm run test:claims -- --grep \"@claim:local-price-book\"",
+    "sandbox": "fresh ledger with a known local price, then no price; unreachable HTTP proxy"
+  },
+  {
+    "id": "semantic-mapping",
+    "claim": "Maps the documented current and legacy attributes and keeps missing dimensions as unknown.",
+    "where": "landing page, README",
+    "test": "npm run test:claims -- --grep \"@claim:semantic-mapping\"",
+    "sandbox": "bundled sample containing current, legacy, and missing-dimension spans"
+  },
+  {
+    "id": "web-demo-matches-cli",
+    "claim": "The website sample shows the same totals as the bundled CLI demo.",
+    "where": "landing page, demo page, README",
+    "test": "npm run test:claims -- --grep \"@claim:web-demo-matches-cli\"",
+    "sandbox": "fresh browser demo plus a fresh CLI demo ledger and its local dashboard"
+  },
+  {
+    "id": "web-csv-export",
+    "claim": "Exports the visible sample ledger as CSV in the browser.",
+    "where": "landing page, demo page",
+    "test": "npm run test:claims -- --grep \"@claim:web-csv-export\"",
+    "sandbox": "fresh /demo browser state; download and parse the project CSV"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "The demo reloads offline after the first visit.",
+    "where": "README",
+    "test": "npm run test:claims -- --grep \"@claim:offline-reload\"",
+    "sandbox": "own fresh browser context; load /demo, wait for its service worker, switch offline, and reload"
+  },
+  {
+    "id": "demo-sandbox",
+    "claim": "The one-click sample is labelled, resettable, and does not change non-demo browser data.",
+    "where": "landing page, demo page, README",
+    "test": "npm run test:claims -- --grep \"@claim:demo-sandbox\"",
+    "sandbox": "fresh browser state with a non-demo sentinel; enter from the first screen, change, reset, and leave"
+  },
+  {
+    "id": "site-privacy",
+    "claim": "The static website uses no cookies, analytics, remote fonts, or remote scripts.",
+    "where": "privacy page",
+    "test": "npm run test:claims -- --grep \"@claim:site-privacy\"",
+    "sandbox": "record every browser request and cookie through the full demo flow"
+  },
+  {
+    "id": "free-mit",
+    "claim": "The product is free and MIT licensed.",
+    "where": "landing page, terms page, README",
+    "test": "npm run test:claims -- --grep \"@claim:free-mit\"",
+    "sandbox": "run the complete demo with no license input and inspect the distributed license"
+  }
+]

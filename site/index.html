@@ -3,48 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Local, vendor-neutral token, cost, cache, latency, and error accounting from OpenTelemetry traces.">
+  <meta name="description" content="Count token, cost, cache, latency, and error totals from local OpenTelemetry traces.">
   <meta name="theme-color" content="#f3ebd8">
-  <title>OTel Token Meter · Private token accounting from your traces</title>
+  <link rel="canonical" href="https://otel-token-meter.sociobot.in/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://otel-token-meter.sociobot.in/">
+  <meta property="og:title" content="OTel Token Meter — Count tokens from OTLP traces">
+  <meta property="og:description" content="Count token, cost, cache, latency, and error totals from local OpenTelemetry traces.">
+  <meta property="og:image" content="https://otel-token-meter.sociobot.in/og-trace-press.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="OTel Token Meter — Count tokens from OTLP traces">
+  <meta name="twitter:description" content="Count token, cost, cache, latency, and error totals from local OpenTelemetry traces.">
+  <meta name="twitter:image" content="https://otel-token-meter.sociobot.in/og-trace-press.webp">
+  <title>OTel Token Meter — Count tokens from OTLP traces</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="/src/styles.css">
 </head>
-<body>
+<body data-page="home">
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="site-header">
-    <nav class="nav wrap" aria-label="Primary navigation"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a><div class="nav-links"><a href="#how">How it maps</a><a href="#demo">Demo</a><a class="button" href="#install">Install free</a></div></nav>
+    <nav class="nav wrap" aria-label="Primary navigation">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a>
+      <div class="nav-links"><a href="/demo/">Demo</a><a href="/#how">How it works</a><a href="/privacy/">Privacy</a><a class="button" href="/#install">Install</a></div>
+    </nav>
   </header>
   <main id="main">
     <section class="hero">
       <div class="hero-grid wrap">
-        <div class="hero-copy"><div class="eyebrow">Local OTLP accounting</div><h1>Count every token. Keep every prompt private.</h1><p class="lede">Turn traces from coding agents and LLM apps into a local ledger of tokens, cost, cache, latency, and errors—without another SDK, proxy, or hosted dashboard.</p><div class="actions"><a class="button" href="#install">Install the collector <span aria-hidden="true">↓</span></a><a class="button secondary" href="https://github.com/B-Divyesh/sf-otel-token-meter">Read the source</a></div><p class="privacy-line"><span aria-hidden="true"></span>Aggregate-only storage. Loopback by default. Zero telemetry.</p></div>
-        <figure class="hero-art"><picture><source media="(max-width: 700px)" srcset="/trace-press-768.webp"><img src="/trace-press.webp" width="1200" height="800" fetchpriority="high" alt="A halftone field meter turns dotted telemetry streams into four aggregate ledger bands while message fragments dissolve before entering."></picture></figure>
+        <div class="hero-copy">
+          <div class="eyebrow">Local OTLP token accounting</div>
+          <h1>Count tokens from OpenTelemetry traces</h1>
+          <p class="lede">For teams running coding agents, it groups local token, cost, cache, latency, and error totals.</p>
+          <div class="actions"><a class="button" href="/demo/">Try it with sample data</a><a class="button secondary" href="#install">Install the collector</a></div>
+          <p class="action-note">The sample opens ready to use and does not change your files.</p>
+          <ul class="plain-facts" aria-label="Product facts"><li>Free and MIT licensed</li><li>Stores aggregate totals only</li><li>Runs on your machine</li></ul>
+        </div>
+        <figure class="hero-art"><picture><source media="(max-width: 700px)" srcset="/trace-press-768.webp"><img src="/trace-press.webp" width="1200" height="800" fetchpriority="high" alt="A halftone meter turns dotted trace lines into four aggregate ledger bands while message fragments disappear."></picture></figure>
       </div>
     </section>
-    <div class="strip" aria-label="Supported measures"><div class="strip-inner wrap"><span>Input + output</span><span>◆</span><span>Cache read + write</span><span>◆</span><span>Latency + errors</span><span>◆</span><span>Observed or priced cost</span></div></div>
+    <div class="strip" aria-label="Measured totals"><div class="strip-inner wrap"><span>Input and output</span><span aria-hidden="true">◆</span><span>Cache read and write</span><span aria-hidden="true">◆</span><span>Latency and errors</span><span aria-hidden="true">◆</span><span>Observed or priced cost</span></div></div>
 
-    <section id="demo" aria-labelledby="demo-title"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Recorded demo</div><h2 id="demo-title">The ledger, before the dashboard tax.</h2></div><p>Switch dimensions and export a real CSV. This sample mirrors the local dashboard served by the binary.</p></div>
-      <div class="demo-shell"><div class="demo-top"><div class="collector-status"><i aria-hidden="true"></i> Sample collector live</div><div class="demo-label">No trace bodies retained</div></div><div class="demo-summary" aria-label="Sample totals"><div class="demo-stat"><strong>729</strong><span>requests</span></div><div class="demo-stat"><strong>1.61M</strong><span>tokens</span></div><div class="demo-stat"><strong>1,083 ms</strong><span>average latency</span></div><div class="demo-stat"><strong>8</strong><span>errors</span></div></div>
-        <div class="demo-tools"><div class="tabs" role="tablist" aria-label="Group sample ledger"><button class="tab" id="tab-project" role="tab" aria-controls="demo-table" aria-selected="true" tabindex="0" data-group="project">Project</button><button class="tab" id="tab-model" role="tab" aria-controls="demo-table" aria-selected="false" tabindex="-1" data-group="model">Model</button><button class="tab" id="tab-tool" role="tab" aria-controls="demo-table" aria-selected="false" tabindex="-1" data-group="tool">Tool</button></div><div><button class="button secondary" id="empty-toggle" type="button">Show empty state</button> <button class="button" id="export" type="button">Export CSV</button></div></div><div class="export-note" id="export-note" role="status"></div><div class="table-wrap" id="demo-table" role="tabpanel" tabindex="0" aria-labelledby="tab-project" aria-label="Sample usage ledger; scroll horizontally for all columns" aria-live="polite"></div>
-      </div></div></section>
-
-    <section id="how" aria-labelledby="how-title"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Known conventions, honest gaps</div><h2 id="how-title">One trace in. Three useful dimensions out.</h2></div><p>Standard GenAI attributes are preferred; common legacy names are mapped. Anything missing remains visible as <code>unknown</code>.</p></div>
-      <div class="map-grid"><div class="map-intro"><h3>Trace content is not accounting data.</h3><p>Prompt text, completion text, trace IDs, events, and individual spans are never written to disk. Only the counters needed for attribution cross into the ledger.</p><p><strong>Stored:</strong> grouped counters, duration totals, error counts, observed cost, last-updated time.</p></div><div class="map-flow"><div class="flow-step"><strong>OTLP/HTTP</strong><small>protobuf or JSON · /v1/traces</small></div><div class="flow-step"><strong>Semantic mapping</strong><small>GenAI + common legacy attributes</small></div><div class="flow-step"><strong>Aggregate ledger</strong><small>project × model × tool</small></div></div></div>
-      <div class="conventions table-wrap" tabindex="0" aria-label="Semantic convention mapping; scroll horizontally for all columns"><table><thead><tr><th scope="col">Measure</th><th scope="col">Preferred attribute</th><th scope="col">Fallback</th></tr></thead><tbody><tr><td data-label="Measure">Input tokens</td><td data-label="Preferred"><code>gen_ai.usage.input_tokens</code></td><td data-label="Fallback"><code>llm.usage.prompt_tokens</code></td></tr><tr><td data-label="Measure">Output tokens</td><td data-label="Preferred"><code>gen_ai.usage.output_tokens</code></td><td data-label="Fallback"><code>llm.usage.completion_tokens</code></td></tr><tr><td data-label="Measure">Model</td><td data-label="Preferred"><code>gen_ai.response.model</code></td><td data-label="Fallback"><code>gen_ai.request.model</code></td></tr><tr><td data-label="Measure">Project</td><td data-label="Preferred"><code>service.namespace</code></td><td data-label="Fallback"><code>project.id</code></td></tr></tbody></table></div>
+    <section id="preview" aria-labelledby="preview-title"><div class="wrap">
+      <div class="section-head"><div><div class="eyebrow">Sample output</div><h2 id="preview-title">Review the sample ledger</h2></div><p>Group five recorded spans by project, model, or tool. Export the current view as CSV.</p></div>
+      <div class="demo-shell"><div class="demo-top"><div class="collector-status"><i aria-hidden="true"></i> Sample ready</div><div class="demo-label">Bundled OTLP sample</div></div><div class="demo-summary" aria-label="Sample totals"><div class="demo-stat"><strong data-total="requests">5</strong><span>requests</span></div><div class="demo-stat"><strong data-total="tokens">1.61M</strong><span>tokens</span></div><div class="demo-stat"><strong data-total="latency">827 ms</strong><span>average latency</span></div><div class="demo-stat"><strong data-total="errors">2</strong><span>errors</span></div></div>
+        <div class="demo-tools"><div class="tabs" role="tablist" aria-label="Group sample ledger"><button class="tab" id="tab-project" role="tab" aria-controls="demo-table" aria-selected="true" tabindex="0" data-group="project">Project</button><button class="tab" id="tab-model" role="tab" aria-controls="demo-table" aria-selected="false" tabindex="-1" data-group="model">Model</button><button class="tab" id="tab-tool" role="tab" aria-controls="demo-table" aria-selected="false" tabindex="-1" data-group="tool">Tool</button></div><div class="tool-actions"><button class="button secondary" id="empty-toggle" type="button">Show empty state</button><button class="button" id="export" type="button">Export CSV</button></div></div><div class="export-note" id="export-note" role="status"></div><div class="table-wrap" id="demo-table" role="tabpanel" tabindex="0" aria-labelledby="tab-project" aria-label="Sample usage ledger" aria-live="polite"></div>
+      </div>
     </div></section>
 
-    <section id="install" aria-labelledby="install-title"><div class="wrap install-grid"><div><div class="eyebrow">One binary</div><h2 id="install-title">Open the local meter.</h2><p>Start collecting in under a minute. The same address receives OTLP traces and serves the dashboard.</p><div class="principles"><div class="principle"><b>01</b><h3>Vendor-neutral</h3><p>Any OTLP/HTTP exporter can send traces.</p></div><div class="principle"><b>02</b><h3>Scriptable</h3><p>Table, JSON, and CSV outputs with useful exit codes.</p></div><div class="principle"><b>03</b><h3>Free + MIT</h3><p>No account, license key, or hosted dependency.</p></div></div></div>
-      <div class="terminal" aria-label="Installation commands"><div class="terminal-head">shell · localhost</div><pre><span class="prompt">$</span> cargo install --git https://github.com/B-Divyesh/sf-otel-token-meter
+    <section id="how" aria-labelledby="how-title"><div class="wrap">
+      <div class="section-head"><div><div class="eyebrow">Three steps</div><h2 id="how-title">Collect, group, and export totals</h2></div><p>Use an existing OTLP exporter. No model proxy or extra tracing SDK is required.</p></div>
+      <ol class="process-list"><li><b>01</b><h3>Receive OTLP traces</h3><p>The local endpoint accepts OTLP/HTTP JSON or protobuf. It supports identity and gzip encoding.</p></li><li><b>02</b><h3>Store aggregate totals</h3><p>The collector maps common GenAI attributes. Missing project, model, or tool names stay visible as <code>unknown</code>.</p></li><li><b>03</b><h3>Report and export</h3><p>Read a terminal table or stable JSON. Export the same grouped totals as CSV.</p></li></ol>
+      <div class="conventions table-wrap" tabindex="0" aria-label="Semantic convention mapping"><table><thead><tr><th scope="col">Measure</th><th scope="col">Preferred attribute</th><th scope="col">Fallback</th></tr></thead><tbody><tr><td data-label="Measure">Input tokens</td><td data-label="Preferred"><code>gen_ai.usage.input_tokens</code></td><td data-label="Fallback"><code>llm.usage.prompt_tokens</code></td></tr><tr><td data-label="Measure">Output tokens</td><td data-label="Preferred"><code>gen_ai.usage.output_tokens</code></td><td data-label="Fallback"><code>llm.usage.completion_tokens</code></td></tr><tr><td data-label="Measure">Model</td><td data-label="Preferred"><code>gen_ai.response.model</code></td><td data-label="Fallback"><code>gen_ai.request.model</code></td></tr><tr><td data-label="Measure">Project</td><td data-label="Preferred"><code>service.namespace</code></td><td data-label="Fallback"><code>project.id</code></td></tr></tbody></table></div>
+    </div></section>
 
-<span class="prompt">$</span> otel-token-meter serve \
-    --listen 127.0.0.1:4318 \
-    --data ./token-meter.json
+    <section id="data" aria-labelledby="data-title"><div class="wrap map-grid"><div class="map-intro"><div class="eyebrow">Aggregate-only storage</div><h2 id="data-title">Keep trace content out of the ledger</h2><p>Prompt text, response text, trace IDs, events, and individual spans are not stored.</p><p>The ledger contains grouped counters, durations, errors, cost totals, and its last update time.</p></div><div class="map-flow" aria-label="Data path"><div class="flow-step"><strong>OTLP/HTTP request</strong><small>JSON or protobuf on your machine</small></div><div class="flow-step"><strong>Semantic mapping</strong><small>Token, cache, cost, latency, and error values</small></div><div class="flow-step"><strong>Aggregate ledger</strong><small>Project, model, and tool totals</small></div></div></div></section>
 
-collecting → http://127.0.0.1:4318/v1/traces
-dashboard  → http://127.0.0.1:4318/</pre><div class="copy-row"><span id="copy-result" role="status"></span><button class="button" id="copy-command" type="button">Copy install command</button></div></div>
+    <section id="install" aria-labelledby="install-title"><div class="wrap install-grid"><div><div class="eyebrow">Single Rust binary</div><h2 id="install-title">Install the local collector</h2><p>Install from source, then send OTLP traces to the loopback address.</p><pre class="install-command"><code>cargo install --git https://github.com/B-Divyesh/sf-otel-token-meter
+otel-token-meter serve --data ./token-meter.json</code></pre><div class="copy-row"><span id="copy-result" role="status"></span><button class="button" id="copy-command" type="button">Copy install command</button></div></div>
+      <figure class="terminal"><figcaption class="terminal-head">Recorded from otel-token-meter demo</figcaption><pre><span class="prompt">$</span> otel-token-meter demo
+Demo — bundled sample, isolated from your data.
+Accepted 5 GenAI spans.
+
+project         requests    input   output    cache  avg ms  errors  cost USD
+checkout-agent         2   797320   142530   423320   1024.0       1    2.4380
+docs-indexer           1   402450    62880   198340    932.0       0    0.9434
+release-bot            1   173880    28170    90200   1104.0       1    0.7006
+unknown                1       80       20        0     50.0       0    0.0000
+
+Sample files: /tmp/otel-token-meter-demo-…
+CSV report: …/usage-by-project.csv</pre></figure>
     </div></section>
   </main>
-  <footer class="site-footer"><div class="wrap footer-grid"><div><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a><p>Private accounting for public conventions.</p></div><div class="footer-links"><a href="https://github.com/B-Divyesh/sf-otel-token-meter">GitHub</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a></div></div></footer>
+  <footer class="site-footer"><div class="wrap footer-grid"><div><a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>OTel Token Meter</a><p>Local token and latency accounting from OTLP traces.</p></div><div class="footer-links"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><span>Built by Param Factory</span><span>v0.1.0 · build __BUILD_ID__</span></div></div></footer>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

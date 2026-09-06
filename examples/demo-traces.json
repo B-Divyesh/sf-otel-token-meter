@@ -1,0 +1,100 @@
+{
+  "resourceSpans": [
+    {
+      "resource": { "attributes": [
+        { "key": "service.name", "value": { "stringValue": "kiro" } },
+        { "key": "service.namespace", "value": { "stringValue": "checkout-agent" } }
+      ] },
+      "scopeSpans": [{ "spans": [{
+        "traceId": "00112233445566778899aabbccddeeff",
+        "spanId": "0011223344556677",
+        "name": "agent turn",
+        "startTimeUnixNano": "1000000",
+        "endTimeUnixNano": "1285000000",
+        "attributes": [
+          { "key": "gen_ai.request.model", "value": { "stringValue": "claude-sonnet-4" } },
+          { "key": "gen_ai.usage.input_tokens", "value": { "intValue": "581230" } },
+          { "key": "gen_ai.usage.output_tokens", "value": { "intValue": "94210" } },
+          { "key": "gen_ai.usage.cache_read.input_tokens", "value": { "intValue": "312840" } },
+          { "key": "gen_ai.prompt", "value": { "stringValue": "PRIVATE CHECKOUT PROMPT" } },
+          { "key": "gen_ai.completion", "value": { "stringValue": "PRIVATE CHECKOUT RESPONSE" } }
+        ],
+        "status": { "code": 2, "message": "rate limit" }
+      }] }]
+    },
+    {
+      "resource": { "attributes": [
+        { "key": "service.name", "value": { "stringValue": "gemini-cli" } },
+        { "key": "project.id", "value": { "stringValue": "docs-indexer" } }
+      ] },
+      "scopeSpans": [{ "spans": [{
+        "traceId": "10112233445566778899aabbccddeeff",
+        "spanId": "1011223344556677",
+        "name": "generate",
+        "startTimeUnixNano": "2000000",
+        "endTimeUnixNano": "934000000",
+        "attributes": [
+          { "key": "gen_ai.response.model", "value": { "stringValue": "gemini-2.5-pro" } },
+          { "key": "llm.usage.prompt_tokens", "value": { "intValue": "402450" } },
+          { "key": "llm.usage.completion_tokens", "value": { "intValue": "62880" } },
+          { "key": "gen_ai.usage.cached_input_tokens", "value": { "intValue": "198340" } }
+        ],
+        "status": { "code": 1 }
+      }] }]
+    },
+    {
+      "resource": { "attributes": [
+        { "key": "service.name", "value": { "stringValue": "codex" } },
+        { "key": "service.namespace", "value": { "stringValue": "checkout-agent" } }
+      ] },
+      "scopeSpans": [{ "spans": [{
+        "traceId": "20112233445566778899aabbccddeeff",
+        "spanId": "2011223344556677",
+        "name": "responses",
+        "startTimeUnixNano": "3000000",
+        "endTimeUnixNano": "767000000",
+        "attributes": [
+          { "key": "llm.model_name", "value": { "stringValue": "gpt-5-mini" } },
+          { "key": "ai.prompt_tokens", "value": { "intValue": "216090" } },
+          { "key": "ai.completion_tokens", "value": { "intValue": "48320" } },
+          { "key": "gen_ai.usage.cache_read.input_tokens", "value": { "intValue": "110480" } }
+        ],
+        "status": { "code": 1 }
+      }] }]
+    },
+    {
+      "resource": { "attributes": [
+        { "key": "service.name", "value": { "stringValue": "kiro" } },
+        { "key": "deployment.environment.name", "value": { "stringValue": "release-bot" } }
+      ] },
+      "scopeSpans": [{ "spans": [{
+        "traceId": "30112233445566778899aabbccddeeff",
+        "spanId": "3011223344556677",
+        "name": "agent turn",
+        "startTimeUnixNano": "4000000",
+        "endTimeUnixNano": "1108000000",
+        "attributes": [
+          { "key": "gen_ai.request.model", "value": { "stringValue": "claude-sonnet-4" } },
+          { "key": "gen_ai.usage.input_tokens", "value": { "intValue": "173880" } },
+          { "key": "gen_ai.usage.output_tokens", "value": { "intValue": "28170" } },
+          { "key": "gen_ai.usage.cache_read.input_tokens", "value": { "intValue": "90200" } },
+          { "key": "error.type", "value": { "stringValue": "timeout" } }
+        ],
+        "status": { "code": 1 }
+      }] }]
+    },
+    {
+      "resource": { "attributes": [] },
+      "scopeSpans": [{ "spans": [{
+        "name": "unlabelled model call",
+        "startTimeUnixNano": "5000000",
+        "endTimeUnixNano": "55000000",
+        "attributes": [
+          { "key": "gen_ai.usage.input_tokens", "value": { "intValue": "80" } },
+          { "key": "gen_ai.usage.output_tokens", "value": { "intValue": "20" } }
+        ],
+        "status": { "code": 1 }
+      }] }]
+    }
+  ]
+}
