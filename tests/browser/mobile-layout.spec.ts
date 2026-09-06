@@ -17,6 +17,10 @@ test('landing and demo remain usable at 390 px', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Count tokens from OpenTelemetry traces' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Try it with sample data' })).toBeVisible();
   await expect(page.locator('#demo-table tbody tr')).toHaveCount(4);
+  expect(await page.getByRole('heading', { name: 'Count tokens from OpenTelemetry traces' }).evaluate(element => {
+    const bounds = element.getBoundingClientRect();
+    return bounds.right <= document.documentElement.clientWidth;
+  })).toBe(true);
   await expectNoDocumentOverflow(page);
 
   await page.getByRole('link', { name: 'Try it with sample data' }).click();

@@ -165,6 +165,7 @@ tbody tr:last-child td { border-bottom: 0; }
 @media (max-width: 600px) {
   .wrap { width: min(100% - 28px, 1180px); }
   h1 { font-size: 49px; }
+  .hero h1 { font-size: clamp(36px, 11.5vw, 46px); }
   section { padding: 72px 0; }
   .demo-summary { grid-template-columns: 1fr 1fr; }
   .demo-stat:nth-child(2) { border-right: 0; }
