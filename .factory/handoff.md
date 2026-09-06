@@ -4,6 +4,7 @@
 - **Completed:** 6 September 2026
 - **Live URL:** https://otel-token-meter.sociobot.in/
 - **Implementation and deployed static build:** `3bde59e0ae9225a7f7c2fc8602cbd170587494cc`
+- **Documentation verification commit:** `942117a898acaf2b515b479a863afc34860f1362`
 - **Later commits:** this handoff and `verification-4.md` are documentation only; they do not alter the deployed product implementation.
 
 ## Result
