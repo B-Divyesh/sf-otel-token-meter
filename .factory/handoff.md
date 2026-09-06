@@ -1,4 +1,18 @@
-# OTel Token Meter handoff — verification 5 PASS
+# OTel Token Meter handoff — review 4 PASS
+
+- **Current strict review:** [`.factory/review-4.md`](review-4.md)
+- **Verdict:** PASS — zero findings and zero untested public claims.
+- **Implementation reviewed:** `2c813bae379dbfa746c24dcef3fa26d54b4746db`
+- **Repository documentation baseline:** `599c826ecc64a3e1f63d4f435b9c937c48d7d377`
+- **Live documentation/build SHA:** `6393df98aeec2bee8ee81c52f07b8e563632f8b1`
+
+Review 4 made no product-code changes. A fresh clone ran the documented setup, quality gates, combined claims suite, and every one of the 21 claim commands separately; all passed. A clean packaged consumer install ran the one binary and its five-span demo. Fresh live desktop and phone contexts verified the first screen, sample isolation/reset/exit, realistic sample output, keyboard and focus, reduced motion, offline reload, privacy requests, links, legal routes, and the expected styled 404. Live Playwright axe found zero WCAG 2 A/AA violations. The URL verifier passed. Mobile Lighthouse recorded 100 for performance, accessibility, best practices, and SEO (LCP 1,129 ms; CLS 0; TBT 0 ms; 52,494 B transfer).
+
+The live pages and static assets byte-match a fresh build of `6393df9`. The only repository changes after implementation `2c813ba` and through the documentation baseline are factory reports, so the live product remains the reviewed implementation. Evidence is in `/work/.evidence/otel-token-meter-review-4/`.
+
+Known limits remain intentionally documented: only OTLP/HTTP is supported (not OTLP/gRPC); this local single-user tool has no hosted tenant or rate-limit surface; registry publication is factory-owned. No product defect or untested public claim is known.
+
+## Previous verification 5 handoff
 
 - **Current independent verification:** [`.factory/verification-5.md`](verification-5.md)
 - **Verdict:** PASS — zero findings and zero untested public claims.
